@@ -51,7 +51,7 @@ return [
 
 ## Credits
 
-Icon: [Login icon by Gregor Cresnar](git@github.com:sjelfull/craft3-autologin.git)
+Icon: [Login icon by Gregor Cresnar](https://thenounproject.com/term/login/1039023)
 
 ## Roadmap
 
