@@ -49,9 +49,6 @@ return [
         'craftUserName' => 'BepmD8GQBZpaFpXQ',
     ],
 
-    // Set this to a username if you want to automatically login on localhost
-    'localhostUsername' => '',
-
     // Redirect to this url after logging in automatically
     'redirectUrl'       => '',
 ];
