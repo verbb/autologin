@@ -1,0 +1,50 @@
+{
+    "name": "superbig/craft3-autologin",
+    "description": "Automatically login based on whitelisted IP or a key",
+    "type": "craft-plugin",
+    "version": "1.0.0",
+    "keywords": [
+        "craft",
+        "cms",
+        "craftcms",
+        "craft-plugin",
+        "autologin"
+    ],
+    "support": {
+        "docs": "https://github.com/sjelfull/craft3-autologin/blob/master/README.md",
+        "issues": "https://github.com/sjelfull/craft3-autologin/issues"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Superbig",
+            "homepage": "https://superbig.co"
+        }
+    ],
+    "require": {
+        "craftcms/cms": "~3.0.0-beta.23"
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://asset-packagist.org"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+          "superbig\\autologin\\": "src/"
+        }
+    },
+    "extra": {
+        "name": "Autologin",
+        "handle": "autologin",
+        "schemaVersion": "1.0.0",
+        "hasCpSettings": false,
+        "hasCpSection": false,
+        "changelogUrl": "https://raw.githubusercontent.com/sjelfull/craft3-autologin/master/CHANGELOG.md",
+        "components": {
+            "autologinService": "superbig\\autologin\\services\\AutologinService"
+        },
+        "class": "superbig\\autologin\\Autologin"
+    }
+}
