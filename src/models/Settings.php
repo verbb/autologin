@@ -41,9 +41,17 @@ class Settings extends Model
 
     /**
      * A list of Craft usernames mapped to basic auth usernames
+     *
      * @var array
      */
     public $basicAuth = [];
+
+    /**
+     * A list of Craft usernames mapped to url keys
+     *
+     * @var array
+     */
+    public $urlKeys = [];
 
     /**
      * Set this to a username if you want to automatically login on localhost
@@ -76,6 +84,7 @@ class Settings extends Model
             [ 'localhostUsername', 'default', 'value' => '' ],
             [ 'ipWhitelist', 'default', 'value' => [] ],
             [ 'basicAuth', 'default', 'value' => [] ],
+            [ 'urlKeys', 'default', 'value' => [] ],
         ];
     }
 }

@@ -10,6 +10,7 @@
 
 namespace superbig\autologin\services;
 
+use craft\helpers\UrlHelper;
 use superbig\autologin\Autologin;
 
 use Craft;
@@ -22,12 +23,35 @@ use craft\base\Component;
  */
 class AutologinService extends Component
 {
+    const REDIRECT_MODE_SITE = 'site';
+    const REDIRECT_MODE_CP   = 'cp';
+
+    protected $_settings;
+
     // Public Methods
     // =========================================================================
 
+    public function loginByKey ($key = null, $cp = false)
+    {
+        $settings     = $this->_getSettings();
+        $redirectMode = $cp ? self::REDIRECT_MODE_CP : self::REDIRECT_MODE_SITE;
+
+        if ( !Craft::$app->user->getIsGuest() ) {
+            return $this->_afterLogin($redirectMode);
+        }
+
+        if ( $key ) {
+            foreach ($settings->urlKeys as $craftUsername => $matchKey) {
+                if ( trim($key) === $matchKey ) {
+                    return $this->_loginByUsername($craftUsername, $redirectMode);
+                }
+            }
+        }
+    }
+
     public function shouldLogin ()
     {
-        $settings = Autologin::$plugin->getSettings();
+        $settings = $this->_getSettings();
 
         if ( !$settings->enabled ) {
             return false;
@@ -43,21 +67,28 @@ class AutologinService extends Component
         if ( $currentAuthUser && !empty($settings->basicAuth) ) {
             foreach ($settings->basicAuth as $craftUsername => $authUsername) {
                 if ( $currentAuthUser === $authUsername ) {
-                    $this->_loginByUsername($settings->basicAuth[ $currentAuthUser ]);
+                    return $this->_loginByUsername($settings->basicAuth[ $currentAuthUser ]);
                 }
             }
         }
 
         if ( $currentIp && !empty($settings->ipWhitelist) ) {
             if ( $craftUsername = $this->_matchIp($currentIp) ) {
-                $this->_loginByUsername($craftUsername);
+                return $this->_loginByUsername($craftUsername);
             }
         }
     }
 
+    /**
+     * Match IP against whitelist
+     *
+     * @param $currentIp
+     *
+     * @return int|string
+     */
     private function _matchIp ($currentIp)
     {
-        $settings = Autologin::$plugin->getSettings();
+        $settings = $this->_getSettings();
 
         foreach ($settings->ipWhitelist as $craftUsername => $ips) {
             $filteredIps = array_filter($ips, function ($ip) { return filter_var($ip, FILTER_VALIDATE_IP); });
@@ -68,7 +99,13 @@ class AutologinService extends Component
         }
     }
 
-    private function _loginByUsername ($username)
+    /**
+     * Login by username or email
+     *
+     * @param string $username
+     * @param string $redirectMode
+     */
+    private function _loginByUsername ($username, $redirectMode = self::REDIRECT_MODE_SITE)
     {
         $craftUser = Craft::$app->users->getUserByUsernameOrEmail($username);
 
@@ -76,20 +113,40 @@ class AutologinService extends Component
             $success = Craft::$app->user->loginByUserId($craftUser->id);
 
             if ( $success ) {
-                $this->_afterLogin();
-
-                return $success;
+                return $this->_afterLogin($redirectMode);
             }
         }
     }
 
-    private function _afterLogin ()
+    /**
+     * @param $redirectMode
+     */
+    private function _afterLogin ($redirectMode)
     {
-        $settings = Autologin::$plugin->getSettings();
+        $settings = $this->_getSettings();
 
-        if ( $url = $settings->redirectUrl && !empty($url) ) {
+        if ( $redirectMode === self::REDIRECT_MODE_SITE && $url = $settings->redirectUrl && !empty($url) ) {
             Craft::$app->response->redirect($url);
-            Craft::$app->end();
+
+            return Craft::$app->end();
         }
+
+        if ( $redirectMode === self::REDIRECT_MODE_CP ) {
+            Craft::$app->response->redirect(UrlHelper::cpUrl('/'));
+
+            return Craft::$app->end();
+        }
+    }
+
+    /**
+     * @return \superbig\autologin\models\Settings
+     */
+    private function _getSettings ()
+    {
+        if ( !$this->_settings ) {
+            $this->_settings = Autologin::$plugin->getSettings();
+        }
+
+        return $this->_settings;
     }
 }

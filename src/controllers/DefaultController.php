@@ -10,6 +10,7 @@
 
 namespace superbig\autologin\controllers;
 
+use craft\helpers\UrlHelper;
 use superbig\autologin\Autologin;
 
 use Craft;
@@ -31,7 +32,7 @@ class DefaultController extends Controller
      *         The actions must be in 'kebab-case'
      * @access protected
      */
-    protected $allowAnonymous = ['index', 'do-something'];
+    protected $allowAnonymous = [ 'index' ];
 
     // Public Methods
     // =========================================================================
@@ -39,20 +40,21 @@ class DefaultController extends Controller
     /**
      * @return mixed
      */
-    public function actionIndex()
+    public function actionIndex ()
     {
-        $result = 'Welcome to the DefaultController actionIndex() method';
+        $key = Craft::$app->request->getRequiredParam('key');
+        $cp  = Craft::$app->request->getParam('cp');
 
-        return $result;
-    }
+        $success = Autologin::$plugin->autologinService->loginByKey($key, $cp);
 
-    /**
-     * @return mixed
-     */
-    public function actionDoSomething()
-    {
-        $result = 'Welcome to the DefaultController actionDoSomething() method';
+        if ( !$success ) {
+            return $this->redirect('/');
+        }
+        elseif ( $success && !$cp ) {
 
-        return $result;
+        }
+        elseif ( $success && $cp ) {
+            return $this->redirect(UrlHelper::cpUrl('/'));
+        }
     }
 }

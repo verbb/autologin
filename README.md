@@ -22,10 +22,6 @@ To install the plugin, follow these instructions.
 
 3. In the Control Panel, go to Settings → Plugins and click the “Install” button for Autologin.
 
-## Autologin Overview
-
--Insert text here-
-
 ## Configuring Autologin
 
 ```php
@@ -34,27 +30,44 @@ return [
     // Enable the Autologin plugin
     'enabled'           => true,
 
-    // A list of usernames mapped to IPs
-    'ipWhitelist'       => [],
+    // A list of Craft usernames/emails mapped to IPs
+    'ipWhitelist'       => [
+        'craftUsername' => [
+            '162.247.141.58',
+            '162.247.141.59',
+        ],
+    ],
 
-    // A list of Craft usernames mapped to basic auth usernames
-    'basicAuth'         => [],
+    // A list of Craft usernames/emails mapped to basic auth usernames
+    'basicAuth'         => [
+        'craftUserName1' => 'basicAuthUsername',
+        'craftUserName2' => 'basicAuthUsername2',    
+    ],
+    
+    // A list of Craft usernames/emails mapped to url keys
+    'urlKeys'           => [
+        'craftUserName' => 'BepmD8GQBZpaFpXQ',
+    ],
 
     // Set this to a username if you want to automatically login on localhost
     'localhostUsername' => '',
 
-    // Redirect after logging in automatically
+    // Redirect to this url after logging in automatically
     'redirectUrl'       => '',
 ];
 
 ```
 
+## Login by URL
+
+You can provide your users with a url that automatically logs them in. To set this up, you need a pair of username => password in the `urlKeys` setting.
+
+After setting that up, you can login by going to _siteurl.tld/autologin?key=BepmD8GQBZpaFpXQ_.
+
+If you want to redirect to the control panel dashboard, add cp=true to the url: _siteurl.tld/autologin?key=BepmD8GQBZpaFpXQ&cp=true_
+
 ## Credits
 
 Icon: [Login icon by Gregor Cresnar](https://thenounproject.com/term/login/1039023)
-
-## Roadmap
-
-- Add keys that can be provided to a controller to autologin
 
 Brought to you by [Superbig](https://superbig.co)
