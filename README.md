@@ -2,7 +2,7 @@
 
 Automatically login based on whitelisted IP or a key
 
-![Screenshot](resources/img/plugin-logo.png)
+![Screenshot](resources/img/icon.png)
 
 ## Requirements
 
@@ -18,7 +18,7 @@ To install the plugin, follow these instructions.
 
 2. Then tell Composer to load the plugin:
 
-        composer require sjelfull/autologin
+        composer require superbig/craft3-autologin
 
 3. In the Control Panel, go to Settings → Plugins and click the “Install” button for Autologin.
 
@@ -28,16 +28,33 @@ To install the plugin, follow these instructions.
 
 ## Configuring Autologin
 
--Insert text here-
+```php
+<?php
+return [
+    // Enable the Autologin plugin
+    'enabled'           => true,
 
-## Using Autologin
+    // A list of usernames mapped to IPs
+    'ipWhitelist'       => [],
 
--Insert text here-
+    // A list of Craft usernames mapped to basic auth usernames
+    'basicAuth'         => [],
 
-## Autologin Roadmap
+    // Set this to a username if you want to automatically login on localhost
+    'localhostUsername' => '',
 
-Some things to do, and ideas for potential features:
+    // Redirect after logging in automatically
+    'redirectUrl'       => '',
+];
 
-* Release it
+```
+
+## Credits
+
+Icon: [Login icon by Gregor Cresnar](git@github.com:sjelfull/craft3-autologin.git)
+
+## Roadmap
+
+- Add keys that can be provided to a controller to autologin
 
 Brought to you by [Superbig](https://superbig.co)
