@@ -54,13 +54,6 @@ class Settings extends Model
     public $urlKeys = [];
 
     /**
-     * Set this to a username if you want to automatically login on localhost
-     *
-     * @var string
-     */
-    public $localhostUsername = '';
-
-    /**
      * Redirect after logging in automatically
      *
      * @var string
@@ -77,11 +70,9 @@ class Settings extends Model
     {
         return [
             [ 'enabled', 'boolean' ],
-            [ 'localhostUsername', 'string' ],
             [ 'redirectUrl', 'string' ],
 
             [ 'enabled', 'default', 'value' => true ],
-            [ 'localhostUsername', 'default', 'value' => '' ],
             [ 'ipWhitelist', 'default', 'value' => [] ],
             [ 'basicAuth', 'default', 'value' => [] ],
             [ 'urlKeys', 'default', 'value' => [] ],

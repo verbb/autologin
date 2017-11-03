@@ -36,9 +36,6 @@ return [
     // A list of Craft usernames mapped to url keys
     'urlKeys'           => [],
 
-    // Set this to a username if you want to automatically login on localhost
-    'localhostUsername' => '',
-
     // Redirect after logging in automatically
     'redirectUrl'       => '',
 
