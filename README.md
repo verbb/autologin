@@ -1,6 +1,6 @@
 # Autologin plugin for Craft CMS 3.x
 
-Automatically login based on whitelisted IP or a key
+Automatically login based on whitelisted IP, basic auth username or URL keys
 
 ![Screenshot](resources/img/icon.png)
 

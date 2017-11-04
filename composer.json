@@ -1,6 +1,6 @@
 {
     "name": "superbig/craft3-autologin",
-    "description": "Automatically login based on whitelisted IP or a key",
+    "description": "Automatically login based on whitelisted IP, basic auth username or URL keys",
     "type": "craft-plugin",
     "version": "1.0.0",
     "keywords": [
