@@ -52,12 +52,9 @@ class AutologinService extends Component
     public function shouldLogin ()
     {
         $settings = $this->_getSettings();
+        $request = Craft::$app->getRequest();
 
-        if ( !$settings->enabled ) {
-            return false;
-        }
-
-        if ( !Craft::$app->user->getIsGuest() ) {
+        if ( !$settings->enabled || $request->getIsConsoleRequest() || !Craft::$app->getUser()->getIsGuest() ) {
             return false;
         }
 

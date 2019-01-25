@@ -2,7 +2,7 @@
     "name": "superbig/craft3-autologin",
     "description": "Automatically login based on whitelisted IP, basic auth username or URL keys",
     "type": "craft-plugin",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "keywords": [
         "craft",
         "cms",
@@ -22,7 +22,7 @@
         }
     ],
     "require": {
-        "craftcms/cms": "^3.0.0-beta.23"
+        "craftcms/cms": "^3.0.0"
     },
     "repositories": [
         {
