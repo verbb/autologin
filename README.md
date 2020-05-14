@@ -24,6 +24,8 @@ To install the plugin, follow these instructions.
 
 ## Configuring Autologin
 
+The plugin is configured in the `config/` directory in a file you create called `autologin.php`. What follows is an example of what it might contain.
+
 ```php
 <?php
 return [
