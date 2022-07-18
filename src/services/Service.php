@@ -122,7 +122,7 @@ class Service extends Component
         }
 
         if ($redirectMode === self::REDIRECT_MODE_CP) {
-            Craft::$app->getResponse()->redirect(UrlHelper::cpUrl('/'));
+            Craft::$app->getResponse()->redirect(UrlHelper::cpUrl());
 
             Craft::$app->end();
         }
