@@ -100,7 +100,7 @@ class Service extends Component
 
     private function _loginByUsername(string $username, string $redirectMode = self::REDIRECT_MODE_SITE): void
     {
-        $craftUser = Craft::$app->getUser()->getUserByUsernameOrEmail($username);
+        $craftUser = Craft::$app->getUsers()->getUserByUsernameOrEmail($username);
 
         if ($craftUser) {
             $success = Craft::$app->getUser()->loginByUserId($craftUser->id);
