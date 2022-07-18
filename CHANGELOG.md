@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.0.0 - 2022-06
+## 2.0.0 - 2022-07-18
 
 > {note} The plugin’s package name has changed to `verbb/autologin`. Autologin will need be updated to 2.0 from a terminal, by running `composer require verbb/autologin && composer remove superbig/craft3-autologin`.
 
