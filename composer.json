@@ -1,8 +1,8 @@
 {
-    "name": "superbig/craft3-autologin",
+    "name": "verbb/autologin",
     "description": "Automatically login based on whitelisted IP, basic auth username or URL keys",
     "type": "craft-plugin",
-    "version": "1.0.1",
+    "version": "2.0.0",
     "keywords": [
         "craft",
         "cms",
@@ -11,40 +11,36 @@
         "autologin"
     ],
     "support": {
-        "docs": "https://github.com/sjelfull/craft3-autologin/blob/master/README.md",
-        "issues": "https://github.com/sjelfull/craft3-autologin/issues"
+        "email": "support@verbb.io",
+        "issues": "https://github.com/verbb/autologin/issues?state=open",
+        "source": "https://github.com/verbb/autologin",
+        "docs": "https://github.com/verbb/autologin",
+        "rss": "https://github.com/verbb/autologin/commits/v2.atom"
     },
     "license": "MIT",
     "authors": [
+        {
+            "name": "Verbb",
+            "homepage": "http://verbb.io"
+        },
         {
             "name": "Superbig",
             "homepage": "https://superbig.co"
         }
     ],
     "require": {
-        "craftcms/cms": "^3.0.0"
+        "craftcms/cms": "^3.7.0",
+        "verbb/base": "^1.0.2"
     },
-    "repositories": [
-        {
-            "type": "composer",
-            "url": "https://asset-packagist.org"
-        }
-    ],
     "autoload": {
         "psr-4": {
-          "superbig\\autologin\\": "src/"
+          "verbb\\autologin\\": "src/"
         }
     },
     "extra": {
         "name": "Autologin",
         "handle": "autologin",
-        "schemaVersion": "1.0.0",
-        "hasCpSettings": false,
-        "hasCpSection": false,
-        "changelogUrl": "https://raw.githubusercontent.com/sjelfull/craft3-autologin/master/CHANGELOG.md",
-        "components": {
-            "autologinService": "superbig\\autologin\\services\\AutologinService"
-        },
-        "class": "superbig\\autologin\\Autologin"
+        "changelogUrl": "https://raw.githubusercontent.com/verbb/autologin/craft-3/CHANGELOG.md",
+        "class": "verbb\\autologin\\Autologin"
     }
 }

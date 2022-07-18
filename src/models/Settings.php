@@ -1,28 +1,11 @@
 <?php
-/**
- * Autologin plugin for Craft CMS 3.x
- *
- * Automatically login based on whitelisted IP, basic auth username or URL keys
- *
- * @link      https://superbig.co
- * @copyright Copyright (c) 2017 Superbig
- */
+namespace verbb\autologin\models;
 
-namespace superbig\autologin\models;
-
-use superbig\autologin\Autologin;
-
-use Craft;
 use craft\base\Model;
 
-/**
- * @author    Superbig
- * @package   Autologin
- * @since     1.0.0
- */
 class Settings extends Model
 {
-    // Public Properties
+    // Properties
     // =========================================================================
 
     /**
@@ -60,22 +43,22 @@ class Settings extends Model
      */
     public $redirectUrl = '';
 
+
     // Public Methods
     // =========================================================================
 
-    /**
-     * @inheritdoc
-     */
-    public function rules ()
+    public function defineRules(): array
     {
-        return [
-            [ 'enabled', 'boolean' ],
-            [ 'redirectUrl', 'string' ],
+        $rules = parent::defineRules();
 
-            [ 'enabled', 'default', 'value' => true ],
-            [ 'ipWhitelist', 'default', 'value' => [] ],
-            [ 'basicAuth', 'default', 'value' => [] ],
-            [ 'urlKeys', 'default', 'value' => [] ],
-        ];
+        $rules[] = ['enabled', 'boolean'];
+        $rules[] = ['redirectUrl', 'string'];
+
+        $rules[] = ['enabled', 'default', 'value' => true];
+        $rules[] = ['ipWhitelist', 'default', 'value' => []];
+        $rules[] = ['basicAuth', 'default', 'value' => []];
+        $rules[] = ['urlKeys', 'default', 'value' => []];
+
+        return $rules;
     }
 }

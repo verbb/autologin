@@ -1,99 +1,69 @@
 <?php
-/**
- * Autologin plugin for Craft CMS 3.x
- *
- * Automatically login based on whitelisted IP, basic auth username or URL keys
- *
- * @link      https://superbig.co
- * @copyright Copyright (c) 2017 Superbig
- */
+namespace verbb\autologin;
 
-namespace superbig\autologin;
-
-use superbig\autologin\services\AutologinService as AutologinServiceService;
-use superbig\autologin\models\Settings;
+use verbb\autologin\base\PluginTrait;
+use verbb\autologin\models\Settings;
 
 use Craft;
 use craft\base\Plugin;
-use craft\services\Plugins;
-use craft\events\PluginEvent;
-use craft\web\UrlManager;
 use craft\events\RegisterUrlRulesEvent;
+use craft\helpers\UrlHelper;
+use craft\web\UrlManager;
 
 use yii\base\Event;
 
-/**
- * Class Autologin
- *
- * @author    Superbig
- * @package   Autologin
- * @since     1.0.0
- *
- * @property  AutologinServiceService $autologinService
- * @method   Settings                getSettings();
- */
 class Autologin extends Plugin
 {
-    // Static Properties
+    // Properties
     // =========================================================================
 
-    /**
-     * @var Autologin
-     */
-    public static $plugin;
+    public $schemaVersion = '1.0.0';
+
+
+    // Traits
+    // =========================================================================
+
+    use PluginTrait;
+
 
     // Public Methods
     // =========================================================================
 
-    /**
-     * @inheritdoc
-     */
-    public function init ()
+    public function init(): void
     {
         parent::init();
+
         self::$plugin = $this;
 
-        $this->autologinService->shouldLogin();
+        $this->_setPluginComponents();
+        $this->_setLogging();
+        $this->_registerSiteRoutes();
 
-        Event::on(
-            UrlManager::class,
-            UrlManager::EVENT_REGISTER_SITE_URL_RULES,
-            function (RegisterUrlRulesEvent $event) {
-                $event->rules['autologin'] = 'autologin/default';
-            }
-        );
-
-        Craft::info(
-            Craft::t(
-                'autologin',
-                '{name} plugin loaded',
-                [ 'name' => $this->name ]
-            ),
-            __METHOD__
-        );
+        $this->getService()->shouldLogin();
     }
+
+    public function getSettingsResponse()
+    {
+        Craft::$app->getResponse()->redirect(UrlHelper::cpUrl('autologin/settings'));
+    }
+
 
     // Protected Methods
     // =========================================================================
 
-    /**
-     * @inheritdoc
-     */
-    protected function createSettingsModel ()
+    protected function createSettingsModel(): Settings
     {
         return new Settings();
     }
 
-    /**
-     * @inheritdoc
-     */
-    protected function settingsHtml (): string
+
+    // Private Methods
+    // =========================================================================
+
+    private function _registerSiteRoutes(): void
     {
-        return Craft::$app->view->renderTemplate(
-            'autologin/settings',
-            [
-                'settings' => $this->getSettings()
-            ]
-        );
+        Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_SITE_URL_RULES, function(RegisterUrlRulesEvent $event) {
+            $event->rules['autologin'] = 'autologin/base';
+        });
     }
 }

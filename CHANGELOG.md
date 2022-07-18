@@ -1,13 +1,19 @@
-# Autologin Changelog
+# Changelog
 
-All notable changes to this project will be documented in this file.
+## 2.0.0 - 2022-06
 
-The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
+> {note} The plugin’s package name has changed to `verbb/autologin`. Autologin will need be updated to 2.0 from a terminal, by running `composer require verbb/autologin && composer remove superbig/craft3-autologin`.
+
+### Changed
+- Migration to `verbb/autologin`.
+- Now requires Craft 3.7+.
 
 ## 1.0.0 - 2019-01-25
+
 ### Fixed
 - Fixed error when running commands from CLI
 
 ## 1.0.0 - 2017-11-03
+
 ### Added
 - Initial release
