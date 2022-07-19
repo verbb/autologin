@@ -8,40 +8,11 @@ class Settings extends Model
     // Properties
     // =========================================================================
 
-    /**
-     * Enable the Autologin plugin
-     *
-     * @var boolean
-     */
-    public $enabled = true;
-
-    /**
-     * A list of Craft usernames mapped to IPs
-     *
-     * @var array
-     */
-    public $ipWhitelist = [];
-
-    /**
-     * A list of Craft usernames mapped to basic auth usernames
-     *
-     * @var array
-     */
-    public $basicAuth = [];
-
-    /**
-     * A list of Craft usernames mapped to url keys
-     *
-     * @var array
-     */
-    public $urlKeys = [];
-
-    /**
-     * Redirect after logging in automatically
-     *
-     * @var string
-     */
-    public $redirectUrl = '';
+    public bool $enabled = true;
+    public array $ipWhitelist = [];
+    public array $basicAuth = [];
+    public array $urlKeys = [];
+    public string $redirectUrl = '';
 
 
     // Public Methods

@@ -7,7 +7,6 @@ use Craft;
 use craft\helpers\UrlHelper;
 use craft\web\Controller;
 
-use yii\web\BadRequestHttpException;
 use yii\web\Response;
 
 class BaseController extends Controller
@@ -15,7 +14,7 @@ class BaseController extends Controller
     // Properties
     // =========================================================================
 
-    protected $allowAnonymous = ['index'];
+    protected array|bool|int $allowAnonymous = ['index'];
 
 
     // Public Methods
@@ -32,7 +31,7 @@ class BaseController extends Controller
             return $this->redirect('/');
         }
 
-        if ($success && $cp) {
+        if ($cp) {
             return $this->redirect(UrlHelper::cpUrl('/'));
         }
 

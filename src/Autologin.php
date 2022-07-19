@@ -8,6 +8,7 @@ use Craft;
 use craft\base\Plugin;
 use craft\events\RegisterUrlRulesEvent;
 use craft\helpers\UrlHelper;
+use craft\web\Application;
 use craft\web\UrlManager;
 
 use yii\base\Event;
@@ -17,7 +18,7 @@ class Autologin extends Plugin
     // Properties
     // =========================================================================
 
-    public $schemaVersion = '1.0.0';
+    public string $schemaVersion = '1.0.0';
 
 
     // Traits
@@ -39,12 +40,14 @@ class Autologin extends Plugin
         $this->_setLogging();
         $this->_registerSiteRoutes();
 
-        $this->getService()->shouldLogin();
+        Craft::$app->on(Application::EVENT_INIT, function() {
+            $this->getService()->shouldLogin();
+        });
     }
 
-    public function getSettingsResponse()
+    public function getSettingsResponse(): mixed
     {
-        Craft::$app->getResponse()->redirect(UrlHelper::cpUrl('autologin/settings'));
+        return Craft::$app->getResponse()->redirect(UrlHelper::cpUrl('autologin/settings'));
     }
 
 

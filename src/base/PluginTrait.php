@@ -1,6 +1,7 @@
 <?php
 namespace verbb\autologin\base;
 
+use verbb\autologin\Autologin;
 use verbb\autologin\services\Service;
 
 use Craft;
@@ -14,7 +15,7 @@ trait PluginTrait
     // Static Properties
     // =========================================================================
 
-    public static $plugin;
+    public static Autologin $plugin;
 
 
     // Public Methods

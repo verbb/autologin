@@ -8,27 +8,25 @@ use Craft;
 use craft\base\Component;
 use craft\helpers\UrlHelper;
 
-use yii\base\ExitException;
-
 class Service extends Component
 {
     // Constants
     // =========================================================================
 
-    const REDIRECT_MODE_SITE = 'site';
-    const REDIRECT_MODE_CP = 'cp';
+    public const REDIRECT_MODE_SITE = 'site';
+    public const REDIRECT_MODE_CP = 'cp';
 
 
     // Properties
     // =========================================================================
 
-    protected $_settings;
+    protected ?Settings $_settings = null;
 
 
     // Public Methods
     // =========================================================================
 
-    public function loginByKey($key = null, $cp = false)
+    public function loginByKey($key = null, $cp = false): bool
     {
         $settings = $this->_getSettings();
         $redirectMode = $cp ? self::REDIRECT_MODE_CP : self::REDIRECT_MODE_SITE;
@@ -48,7 +46,7 @@ class Service extends Component
         return false;
     }
 
-    public function shouldLogin()
+    public function shouldLogin(): bool
     {
         $settings = $this->_getSettings();
         $request = Craft::$app->getRequest();
@@ -61,7 +59,7 @@ class Service extends Component
         $currentAuthUser = $request->getAuthUser();
 
         if ($currentAuthUser && !empty($settings->basicAuth)) {
-            foreach ($settings->basicAuth as $craftUsername => $authUsername) {
+            foreach ($settings->basicAuth as $authUsername) {
                 if ($currentAuthUser === $authUsername) {
                     return $this->_loginByUsername($settings->basicAuth[$currentAuthUser]);
                 }
@@ -81,7 +79,7 @@ class Service extends Component
     // Private Methods
     // =========================================================================
 
-    private function _matchIp($currentIp)
+    private function _matchIp($currentIp): bool|int|string
     {
         $settings = $this->_getSettings();
 
@@ -98,7 +96,7 @@ class Service extends Component
         return false;
     }
 
-    private function _loginByUsername(string $username, string $redirectMode = self::REDIRECT_MODE_SITE): void
+    private function _loginByUsername(string $username, string $redirectMode = self::REDIRECT_MODE_SITE): bool
     {
         $craftUser = Craft::$app->getUsers()->getUserByUsernameOrEmail($username);
 
@@ -107,11 +105,15 @@ class Service extends Component
 
             if ($success) {
                 $this->_afterLogin($redirectMode);
+
+                return true;
             }
         }
+
+        return false;
     }
 
-    private function _afterLogin($redirectMode): void
+    private function _afterLogin($redirectMode): bool
     {
         $settings = $this->_getSettings();
 
@@ -119,13 +121,19 @@ class Service extends Component
             Craft::$app->getResponse()->redirect($url);
 
             Craft::$app->end();
+
+            return true;
         }
 
         if ($redirectMode === self::REDIRECT_MODE_CP) {
             Craft::$app->getResponse()->redirect(UrlHelper::cpUrl());
 
             Craft::$app->end();
+
+            return true;
         }
+
+        return false;
     }
 
     private function _getSettings(): Settings
