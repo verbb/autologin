@@ -13,23 +13,4 @@ class Settings extends Model
     public array $basicAuth = [];
     public array $urlKeys = [];
     public string $redirectUrl = '';
-
-
-    // Public Methods
-    // =========================================================================
-
-    public function defineRules(): array
-    {
-        $rules = parent::defineRules();
-
-        $rules[] = ['enabled', 'boolean'];
-        $rules[] = ['redirectUrl', 'string'];
-
-        $rules[] = ['enabled', 'default', 'value' => true];
-        $rules[] = ['ipWhitelist', 'default', 'value' => []];
-        $rules[] = ['basicAuth', 'default', 'value' => []];
-        $rules[] = ['urlKeys', 'default', 'value' => []];
-
-        return $rules;
-    }
 }
