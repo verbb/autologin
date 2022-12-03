@@ -61,7 +61,7 @@ class Service extends Component
         if ($currentAuthUser && !empty($settings->basicAuth)) {
             foreach ($settings->basicAuth as $authUsername) {
                 if ($currentAuthUser === $authUsername) {
-                    return $this->_loginByUsername($settings->basicAuth[$currentAuthUser]);
+                    return $this->_loginByUsername($craftUsername);
                 }
             }
         }
