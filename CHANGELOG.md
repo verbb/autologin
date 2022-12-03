@@ -3,7 +3,7 @@
 ## 2.0.2 - 2022-12-03
 
 ### Fixed
-- 
+- Fix an error when using `basicAuth`.
 
 ## 2.0.1 - 2022-07-19
 
