@@ -1,6 +1,6 @@
 {
     "name": "verbb/autologin",
-    "description": "Automatically login based on whitelisted IP, basic auth username or URL keys",
+    "description": "Automatically login based on whitelisted IP, basic auth username or URL keys.",
     "type": "craft-plugin",
     "version": "3.0.0",
     "keywords": [
