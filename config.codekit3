@@ -9,6 +9,12 @@
   ],
   "creatorBuild" : "34365",
   "files" : {
+    "\/.github" : {
+      "ft" : 65536,
+      "oA" : 1,
+      "oAP" : "\/.github",
+      "oF" : 0
+    },
     "\/.gitignore" : {
       "cB" : 0,
       "ft" : 8192,
@@ -43,6 +49,109 @@
       "oF" : 0,
       "oO" : 0,
       "oS" : 1
+    },
+    "\/docs\/.sidebar.json" : {
+      "ft" : 524288,
+      "oA" : 1,
+      "oAP" : "\/docs\/.sidebar-min.json",
+      "oF" : 0,
+      "oO" : 0,
+      "oS" : 1
+    },
+    "\/docs\/feature-tour\/usage.md" : {
+      "cB" : 0,
+      "cS" : 0,
+      "eF" : 1,
+      "eL" : 1,
+      "ema" : 1,
+      "eSQ" : 1,
+      "ft" : 4096,
+      "hM" : 0,
+      "oA" : 1,
+      "oAP" : "\/docs\/feature-tour\/usage.html",
+      "oF" : 0,
+      "oFM" : 0,
+      "oS" : 0,
+      "pHT" : 0,
+      "pME" : 1,
+      "rFN" : 0,
+      "uCM" : 0
+    },
+    "\/docs\/get-started\/configuration.md" : {
+      "cB" : 0,
+      "cS" : 0,
+      "eF" : 1,
+      "eL" : 1,
+      "ema" : 1,
+      "eSQ" : 1,
+      "ft" : 4096,
+      "hM" : 0,
+      "oA" : 1,
+      "oAP" : "\/docs\/get-started\/configuration.html",
+      "oF" : 0,
+      "oFM" : 0,
+      "oS" : 0,
+      "pHT" : 0,
+      "pME" : 1,
+      "rFN" : 0,
+      "uCM" : 0
+    },
+    "\/docs\/get-started\/installation-setup.md" : {
+      "cB" : 0,
+      "cS" : 0,
+      "eF" : 1,
+      "eL" : 1,
+      "ema" : 1,
+      "eSQ" : 1,
+      "ft" : 4096,
+      "hM" : 0,
+      "oA" : 1,
+      "oAP" : "\/docs\/get-started\/installation-setup.html",
+      "oF" : 0,
+      "oFM" : 0,
+      "oS" : 0,
+      "pHT" : 0,
+      "pME" : 1,
+      "rFN" : 0,
+      "uCM" : 0
+    },
+    "\/docs\/get-started\/requirements.md" : {
+      "cB" : 0,
+      "cS" : 0,
+      "eF" : 1,
+      "eL" : 1,
+      "ema" : 1,
+      "eSQ" : 1,
+      "ft" : 4096,
+      "hM" : 0,
+      "oA" : 1,
+      "oAP" : "\/docs\/get-started\/requirements.html",
+      "oF" : 0,
+      "oFM" : 0,
+      "oS" : 0,
+      "pHT" : 0,
+      "pME" : 1,
+      "rFN" : 0,
+      "uCM" : 0
+    },
+    "\/docs\/README.md" : {
+      "cB" : 0,
+      "cS" : 0,
+      "eF" : 1,
+      "eL" : 1,
+      "ema" : 1,
+      "eSQ" : 1,
+      "ft" : 4096,
+      "hM" : 0,
+      "oA" : 1,
+      "oAP" : "\/docs\/README.html",
+      "oF" : 0,
+      "oFM" : 0,
+      "oS" : 0,
+      "pHT" : 0,
+      "pME" : 1,
+      "rFN" : 0,
+      "uCM" : 0
     },
     "\/LICENSE.md" : {
       "cB" : 0,
@@ -82,10 +191,12 @@
       "rFN" : 0,
       "uCM" : 0
     },
-    "\/src\/assetbundles" : {
-      "ft" : 65536,
-      "oA" : 1,
-      "oAP" : "\/src\/assetbundles",
+    "\/src\/Autologin.php" : {
+      "cB" : 0,
+      "ft" : 8192,
+      "hM" : 0,
+      "oA" : 2,
+      "oAP" : "\/src\/Autologin.php",
       "oF" : 0
     },
     "\/src\/base" : {
@@ -108,22 +219,6 @@
       "oAP" : "\/src\/controllers",
       "oF" : 0
     },
-    "\/src\/enums" : {
-      "ft" : 65536,
-      "oA" : 1,
-      "oAP" : "\/src\/enums",
-      "oF" : 0
-    },
-    "\/src\/icon-mask.svg" : {
-      "ft" : 2097152,
-      "miP" : 0,
-      "oA" : 2,
-      "oAP" : "\/src\/icon-mask.svg",
-      "oF" : 0,
-      "opt" : 0,
-      "plM" : 3758088159,
-      "prP" : 0
-    },
     "\/src\/icon.svg" : {
       "ft" : 2097152,
       "miP" : 0,
@@ -134,48 +229,16 @@
       "plM" : 3758088159,
       "prP" : 0
     },
-    "\/src\/migrations" : {
-      "ft" : 65536,
-      "oA" : 1,
-      "oAP" : "\/src\/migrations",
-      "oF" : 0
-    },
     "\/src\/models" : {
       "ft" : 65536,
       "oA" : 1,
       "oAP" : "\/src\/models",
       "oF" : 0
     },
-    "\/src\/records" : {
-      "ft" : 65536,
-      "oA" : 1,
-      "oAP" : "\/src\/records",
-      "oF" : 0
-    },
     "\/src\/services" : {
       "ft" : 65536,
       "oA" : 1,
       "oAP" : "\/src\/services",
-      "oF" : 0
-    },
-    "\/src\/Shield.php" : {
-      "cB" : 0,
-      "ft" : 8192,
-      "hM" : 0,
-      "oA" : 1,
-      "oAP" : "\/src\/Shield-output.php",
-      "oF" : 0
-    },
-    "\/src\/templates" : {
-      "ft" : 65536,
-      "oA" : 1,
-      "oAP" : "\/src\/templates",
-      "oF" : 0
-    },
-    "\/src\/variables" : {
-      "ft" : 65536,
-      "oA" : 1,
-      "oAP" : "\/src\/variables",
       "oF" : 0
     }
   },
@@ -187,7 +250,7 @@
   },
   "projectAttributes" : {
     "creationDate" : 528723773,
-    "displayValue" : "shield",
+    "displayValue" : "autologin",
     "displayValueWasSetByUser" : 0,
     "iconImageName" : "brackets-koamaru",
     "iconImageWasSetByUser" : 1

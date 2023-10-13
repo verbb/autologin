@@ -36,11 +36,11 @@ class Autologin extends Plugin
 
         self::$plugin = $this;
 
-        $this->_setPluginComponents();
-        $this->_setLogging();
-        $this->_registerSiteRoutes();
+        if (Craft::$app->getRequest()->getIsSiteRequest()) {
+            $this->_registerSiteRoutes();
+        }
 
-        Craft::$app->on(Application::EVENT_INIT, function() {
+        Craft::$app->onInit(function() {
             $this->getService()->shouldLogin();
         });
     }

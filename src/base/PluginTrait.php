@@ -4,41 +4,37 @@ namespace verbb\autologin\base;
 use verbb\autologin\Autologin;
 use verbb\autologin\services\Service;
 
-use Craft;
-
-use yii\log\Logger;
-
-use verbb\base\BaseHelper;
+use verbb\base\LogTrait;
+use verbb\base\helpers\Plugin;
 
 trait PluginTrait
 {
-    // Static Properties
+    // Properties
     // =========================================================================
 
-    public static Autologin $plugin;
+    public static ?Autologin $plugin = null;
 
 
-    // Public Methods
+    // Traits
     // =========================================================================
 
-    public static function log($message, $attributes = []): void
+    use LogTrait;
+
+
+    // Static Methods
+    // =========================================================================
+
+    public static function config(): array
     {
-        if ($attributes) {
-            $message = Craft::t('autologin', $message, $attributes);
-        }
+        Plugin::bootstrapPlugin('autologin');
 
-        Craft::getLogger()->log($message, Logger::LEVEL_INFO, 'autologin');
+        return [
+            'components' => [
+                'service' => Service::class,
+            ],
+        ];
     }
-
-    public static function error($message, $attributes = []): void
-    {
-        if ($attributes) {
-            $message = Craft::t('autologin', $message, $attributes);
-        }
-
-        Craft::getLogger()->log($message, Logger::LEVEL_ERROR, 'autologin');
-    }
-
+    
 
     // Public Methods
     // =========================================================================
@@ -46,24 +42,6 @@ trait PluginTrait
     public function getService(): Service
     {
         return $this->get('service');
-    }
-
-
-    // Private Methods
-    // =========================================================================
-
-    private function _setPluginComponents(): void
-    {
-        $this->setComponents([
-            'service' => Service::class,
-        ]);
-
-        BaseHelper::registerModule();
-    }
-
-    private function _setLogging(): void
-    {
-        BaseHelper::setFileLogging('autologin');
     }
 
 }
