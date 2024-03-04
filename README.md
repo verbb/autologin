@@ -1,5 +1,5 @@
-# Autologin plugin for Craft CMS
-<img width="500" src="https://verbb.imgix.net/plugins/autologin/autologin-social-card.png?v=1">
+<p align="center"><img src="https://verbb.imgix.net/plugins/autologin/autologin-icon.svg" width="100" height="100" alt="Autologin icon"></p>
+<h1 align="center">Autologin for Craft CMS</h1>
 
 Autologin is a Craft CMS plugin to automatically login users based on whitelisted IP, basic auth username or URL keys.
 
