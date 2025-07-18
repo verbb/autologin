@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.0.1 - 2025-07-18
+
+### Changed
+- Update English translations.
+- Remove unneeded `defineRules()`.
+- Craft 4 updates.
+
 ## 3.0.0 - 2022-07-19
 
 ### Changed
