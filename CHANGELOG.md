@@ -6,6 +6,13 @@
 - Now requires PHP `8.2.0+`.
 - Now requires Craft `5.0.0+`.
 
+## 3.0.1 - 2025-07-18
+
+### Changed
+- Update English translations.
+- Remove unneeded `defineRules()`.
+- Craft 4 updates.
+
 ## 3.0.0 - 2022-07-19
 
 ### Changed
@@ -30,11 +37,6 @@
 ### Changed
 - Migration to `verbb/autologin`.
 - Now requires Craft 3.7+.
-
-## 1.0.0 - 2019-01-25
-
-### Fixed
-- Fixed error when running commands from CLI
 
 ## 1.0.0 - 2017-11-03
 
