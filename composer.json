@@ -2,7 +2,7 @@
     "name": "verbb/autologin",
     "description": "Automatically login based on whitelisted IP, basic auth username or URL keys.",
     "type": "craft-plugin",
-    "version": "4.0.1",
+    "version": "5.0.0-alpha.1",
     "keywords": [
         "craft",
         "cms",
@@ -29,9 +29,9 @@
         }
     ],
     "require": {
-        "php": "^8.2",
-        "craftcms/cms": "^5.0.0",
-        "verbb/base": "^3.0.0"
+        "php": "^8.4",
+        "craftcms/cms": "6.x-dev",
+        "verbb/base": "dev-craft-6"
     },
     "autoload": {
         "psr-4": {
@@ -41,7 +41,9 @@
     "extra": {
         "name": "Autologin",
         "handle": "autologin",
-        "changelogUrl": "https://raw.githubusercontent.com/verbb/autologin/craft-5/CHANGELOG.md",
+        "changelogUrl": "https://raw.githubusercontent.com/verbb/autologin/craft-6/CHANGELOG.md",
         "class": "verbb\\autologin\\Autologin"
-    }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
