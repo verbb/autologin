@@ -1,0 +1,24 @@
+{% extends 'autologin/_layouts' %}
+
+{% requireAdmin %}
+
+{% set crumbs = [
+    { label: 'Autologin' | t('autologin'), url: url('settings/plugins') },
+    { label: 'Settings' | t('app'), url: url('autologin/settings') },
+] %}
+
+{% set navItems = {
+    general: { label: 'General Settings' | t('autologin'), url: url('autologin/settings') },
+} %}
+
+{% set title = 'Settings' | t('autologin') %}
+{% set docTitle = navItems[selectedNavItem].label ~ ' - ' ~ title %}
+
+{% block sidebar %}
+    {% include '_includes/nav' with {
+        label: title,
+        items: navItems,
+        selectedItem: selectedNavItem,
+    } only %}
+{% endblock %}
+

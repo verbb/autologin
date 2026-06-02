@@ -18,6 +18,7 @@ class Autologin extends Plugin
     // Properties
     // =========================================================================
 
+    public bool $hasCpSettings = true;
     public string $schemaVersion = '1.0.0';
 
 
@@ -35,6 +36,10 @@ class Autologin extends Plugin
         parent::init();
 
         self::$plugin = $this;
+
+        if (Craft::$app->getRequest()->getIsCpRequest()) {
+            $this->_registerCpRoutes();
+        }
 
         if (Craft::$app->getRequest()->getIsSiteRequest()) {
             $this->_registerSiteRoutes();
@@ -67,6 +72,13 @@ class Autologin extends Plugin
     {
         Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_SITE_URL_RULES, function(RegisterUrlRulesEvent $event) {
             $event->rules['autologin'] = 'autologin/base';
+        });
+    }
+
+    private function _registerCpRoutes(): void
+    {
+        Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function(RegisterUrlRulesEvent $event) {
+            $event->rules['autologin/settings'] = 'autologin/plugin/settings';
         });
     }
 }

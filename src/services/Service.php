@@ -59,7 +59,7 @@ class Service extends Component
         $currentAuthUser = $request->getAuthUser();
 
         if ($currentAuthUser && !empty($settings->basicAuth)) {
-            foreach ($settings->basicAuth as $authUsername) {
+            foreach ($settings->basicAuth as $craftUsername => $authUsername) {
                 if ($currentAuthUser === $authUsername) {
                     return $this->_loginByUsername($craftUsername);
                 }
