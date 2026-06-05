@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.0.2 - 2026-06-05
+
+### Added
+- Add control panel settings page to manage plugin settings.
+
 ## 4.0.1 - 2025-07-18
 
 ### Changed
