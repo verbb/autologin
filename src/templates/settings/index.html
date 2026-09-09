@@ -4,73 +4,67 @@
 {% import 'verbb-base/_macros' as macros %}
 
 {% set fullPageForm = true %}
-{% set selectedNavItem = 'general' %}
+{% set selectedTab = 'general' %}
+{% set pageTitle = 'General Settings' | t('autologin') %}
+{% set pageAction = 'autologin/plugin/save-settings' %}
+{% set pageUrl = 'autologin/settings' %}
 
-{% block blockContent %}
+{% block settingsContent %}
+    {{ forms.lightswitchField({
+        label: 'Enabled' | t('autologin'),
+        instructions: 'Whether to enable automatic logins.' | t('autologin'),
+        id: 'enabled',
+        name: 'enabled',
+        on: settings.enabled,
+        errors: settings.getErrors('enabled'),
+        warning: macros.configWarning('enabled', 'autologin'),
+    }) }}
 
-<input type="hidden" name="action" value="autologin/plugin/save-settings">
+    {{ forms.textareaField({
+        label: 'IP Whitelist' | t('autologin'),
+        instructions: 'A list of Craft usernames or emails mapped to one or more IP addresses. Add each user on a new line, with IP addresses separated by commas.' | t('autologin'),
+        id: 'ipWhitelist',
+        name: 'ipWhitelist',
+        value: settings.getIpWhitelistText(),
+        rows: 4,
+        placeholder: 'craftUsername: 162.247.141.58, 162.247.141.59',
+        errors: settings.getErrors('ipWhitelist'),
+        warning: macros.configWarning('ipWhitelist', 'autologin'),
+    }) }}
 
-{% namespace 'settings' %}
+    {{ forms.textareaField({
+        label: 'Basic Auth' | t('autologin'),
+        instructions: 'A list of Craft usernames or emails mapped to Basic HTTP Auth usernames. Add each mapping on a new line.' | t('autologin'),
+        id: 'basicAuth',
+        name: 'basicAuth',
+        value: settings.getBasicAuthText(),
+        rows: 4,
+        placeholder: 'craftUsername: basicAuthUsername',
+        errors: settings.getErrors('basicAuth'),
+        warning: macros.configWarning('basicAuth', 'autologin'),
+    }) }}
 
-{{ forms.lightswitchField({
-    first: true,
-    label: 'Enabled' | t('autologin'),
-    instructions: 'Whether to enable automatic logins.' | t('autologin'),
-    id: 'enabled',
-    name: 'enabled',
-    on: settings.enabled,
-    errors: settings.getErrors('enabled'),
-    warning: macros.configWarning('enabled', 'autologin'),
-}) }}
+    {{ forms.textareaField({
+        label: 'URL Keys' | t('autologin'),
+        instructions: 'A list of Craft usernames or emails mapped to URL keys. Add each mapping on a new line.' | t('autologin'),
+        id: 'urlKeys',
+        name: 'urlKeys',
+        value: settings.getUrlKeyText(),
+        rows: 4,
+        placeholder: 'craftUsername: BepmD8GQBZpaFpXQ',
+        errors: settings.getErrors('urlKeys'),
+        warning: macros.configWarning('urlKeys', 'autologin'),
+    }) }}
 
-{{ forms.textareaField({
-    label: 'IP Whitelist' | t('autologin'),
-    instructions: 'A list of Craft usernames or emails mapped to one or more IP addresses. Add each user on a new line, with IP addresses separated by commas.' | t('autologin'),
-    id: 'ipWhitelist',
-    name: 'ipWhitelist',
-    value: settings.getIpWhitelistText(),
-    rows: 4,
-    placeholder: 'craftUsername: 162.247.141.58, 162.247.141.59',
-    errors: settings.getErrors('ipWhitelist'),
-    warning: macros.configWarning('ipWhitelist', 'autologin'),
-}) }}
-
-{{ forms.textareaField({
-    label: 'Basic Auth' | t('autologin'),
-    instructions: 'A list of Craft usernames or emails mapped to Basic HTTP Auth usernames. Add each mapping on a new line.' | t('autologin'),
-    id: 'basicAuth',
-    name: 'basicAuth',
-    value: settings.getBasicAuthText(),
-    rows: 4,
-    placeholder: 'craftUsername: basicAuthUsername',
-    errors: settings.getErrors('basicAuth'),
-    warning: macros.configWarning('basicAuth', 'autologin'),
-}) }}
-
-{{ forms.textareaField({
-    label: 'URL Keys' | t('autologin'),
-    instructions: 'A list of Craft usernames or emails mapped to URL keys. Add each mapping on a new line.' | t('autologin'),
-    id: 'urlKeys',
-    name: 'urlKeys',
-    value: settings.getUrlKeyText(),
-    rows: 4,
-    placeholder: 'craftUsername: BepmD8GQBZpaFpXQ',
-    errors: settings.getErrors('urlKeys'),
-    warning: macros.configWarning('urlKeys', 'autologin'),
-}) }}
-
-{{ forms.autosuggestField({
-    label: 'Redirect URL' | t('autologin'),
-    instructions: 'The URL to redirect to after logging in automatically.' | t('autologin'),
-    id: 'redirectUrl',
-    name: 'redirectUrl',
-    suggestEnvVars: true,
-    suggestAliases: true,
-    value: settings.redirectUrl,
-    errors: settings.getErrors('redirectUrl'),
-    warning: macros.configWarning('redirectUrl', 'autologin'),
-}) }}
-
-{% endnamespace %}
-
+    {{ forms.autosuggestField({
+        label: 'Redirect URL' | t('autologin'),
+        instructions: 'The URL to redirect to after logging in automatically.' | t('autologin'),
+        id: 'redirectUrl',
+        name: 'redirectUrl',
+        suggestEnvVars: true,
+        suggestAliases: true,
+        value: settings.redirectUrl,
+        errors: settings.getErrors('redirectUrl'),
+        warning: macros.configWarning('redirectUrl', 'autologin'),
+    }) }}
 {% endblock %}

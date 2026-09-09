@@ -1,24 +1,21 @@
-{% extends 'autologin/_layouts' %}
+{% extends 'verbb-base/_layouts/settings' %}
+
+{% import '_includes/forms' as forms %}
+{% import 'verbb-base/_macros' as macros %}
 
 {% requireAdmin %}
 
 {% set crumbs = [
-    { label: 'Autologin' | t('autologin'), url: url('settings/plugins') },
-    { label: 'Settings' | t('app'), url: url('autologin/settings') },
-] %}
+    { label: 'Settings' | t('app'), url: url('settings') },
+    { label: 'Plugins' | t('app'), url: url('settings/plugins') },
+    { label: 'Autologin' | t('autologin'), url: url('autologin/settings') },
+] | merge(crumbs ?? []) %}
 
-{% set navItems = {
-    general: { label: 'General Settings' | t('autologin'), url: url('autologin/settings') },
+{% set pageTabs = {
+    general: { title: 'General Settings' | t('autologin'), url: url('autologin/settings') },
 } %}
 
-{% set title = 'Settings' | t('autologin') %}
-{% set docTitle = navItems[selectedNavItem].label ~ ' - ' ~ title %}
-
-{% block sidebar %}
-    {% include '_includes/nav' with {
-        label: title,
-        items: navItems,
-        selectedItem: selectedNavItem,
-    } only %}
-{% endblock %}
-
+{% set pageTitle = pageTitle ?? false %}
+{% if title is not defined and pageTitle %}
+    {% set title = pageTitle %}
+{% endif %}
