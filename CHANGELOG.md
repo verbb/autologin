@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+- Route settings updates through Autologin’s authorized settings controller.
 ## 4.0.4 - 2026-09-14
 
 ### Changed
