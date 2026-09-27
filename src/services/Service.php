@@ -6,6 +6,7 @@ use verbb\autologin\models\Settings;
 
 use Craft;
 use craft\base\Component;
+use craft\elements\User;
 use craft\helpers\UrlHelper;
 
 class Service extends Component
@@ -30,6 +31,10 @@ class Service extends Component
     {
         $settings = $this->_getSettings();
         $redirectMode = $cp ? self::REDIRECT_MODE_CP : self::REDIRECT_MODE_SITE;
+
+        if (!$settings->enabled) {
+            return false;
+        }
 
         if (!Craft::$app->getUser()->getIsGuest()) {
             return $this->_afterLogin($redirectMode);
@@ -98,19 +103,30 @@ class Service extends Component
 
     private function _loginByUsername(string $username, string $redirectMode = self::REDIRECT_MODE_SITE): bool
     {
+        if (!$this->_getSettings()->enabled) {
+            return false;
+        }
+
         $craftUser = Craft::$app->getUsers()->getUserByUsernameOrEmail($username);
 
-        if ($craftUser) {
-            $success = Craft::$app->getUser()->loginByUserId($craftUser->id);
+        if (!$craftUser || !$this->_isUserEligible($craftUser)) {
+            return false;
+        }
 
-            if ($success) {
-                $this->_afterLogin($redirectMode);
+        $success = Craft::$app->getUser()->loginByUserId($craftUser->id);
 
-                return true;
-            }
+        if ($success) {
+            $this->_afterLogin($redirectMode);
+
+            return true;
         }
 
         return false;
+    }
+
+    private function _isUserEligible(User $user): bool
+    {
+        return $user->getStatus() === User::STATUS_ACTIVE && !$user->locked;
     }
 
     private function _afterLogin($redirectMode): bool

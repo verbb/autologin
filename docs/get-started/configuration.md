@@ -21,7 +21,7 @@ All other settings keep their defaults. Add any further settings you want to cha
 
 **Type:** `bool` · **Default:** `true`
 
-Whether to enable the Autologin plugin.
+Whether to enable automatic login through URL keys, Basic Auth mappings and IP mappings. Disabling automatic login does not remove configured mappings, so the same credentials become available again when it is re-enabled.
 :::
 
 

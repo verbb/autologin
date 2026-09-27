@@ -5,6 +5,10 @@
 ### Changed
 - Route settings updates through Autologin’s authorized settings controller.
 - Restrict control panel settings access and updates to administrators, respecting the `allowAdminChanges` configuration setting.
+
+### Fixed
+- Prevent automatic login while disabled and for non-active or locked Craft accounts.
+
 ## 4.0.4 - 2026-09-14
 
 ### Changed
