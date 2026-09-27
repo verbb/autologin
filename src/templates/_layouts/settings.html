@@ -3,7 +3,7 @@
 {% import '_includes/forms' as forms %}
 {% import 'verbb-base/_macros' as macros %}
 
-{% requireAdmin %}
+{% requireAdmin false %}
 
 {% set crumbs = [
     { label: 'Settings' | t('app'), url: url('settings') },

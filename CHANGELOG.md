@@ -4,6 +4,7 @@
 
 ### Changed
 - Route settings updates through Autologin’s authorized settings controller.
+- Restrict control panel settings access and updates to administrators, respecting the `allowAdminChanges` configuration setting.
 ## 4.0.4 - 2026-09-14
 
 ### Changed
