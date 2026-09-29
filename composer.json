@@ -1,6 +1,6 @@
 {
     "name": "verbb/autologin",
-    "description": "Automatically login based on whitelisted IP, basic auth username or URL keys.",
+    "description": "A Craft CMS plugin for signing users in with URL keys, trusted IPs or HTTP Basic Authentication.",
     "type": "craft-plugin",
     "version": "4.0.4",
     "keywords": [
