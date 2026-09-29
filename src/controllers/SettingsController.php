@@ -10,6 +10,8 @@ class SettingsController extends BaseSettingsController
 
     protected function prepareSubmittedSettings(array $settings): array
     {
+        unset($settings['mfaAssuredMethods']);
+
         $settings['ipWhitelist'] = $this->_normalizeIpWhitelist($settings['ipWhitelist'] ?? '');
         $settings['basicAuth'] = $this->_normalizeMappedLines($settings['basicAuth'] ?? '');
         $settings['urlKeys'] = $this->_normalizeMappedLines($settings['urlKeys'] ?? '');

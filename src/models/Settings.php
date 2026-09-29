@@ -12,11 +12,22 @@ class Settings extends Model
     public array $ipWhitelist = [];
     public array $basicAuth = [];
     public array $urlKeys = [];
+    public array $mfaAssuredMethods = [];
     public string $redirectUrl = '';
 
 
     // Public Methods
     // =========================================================================
+
+    public function fields(): array
+    {
+        $fields = parent::fields();
+
+        // Keep the MFA assurance decision in PHP configuration rather than project config.
+        unset($fields['mfaAssuredMethods']);
+
+        return $fields;
+    }
 
     public function getIpWhitelistText(): string
     {

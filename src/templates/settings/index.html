@@ -22,7 +22,7 @@
 
     {{ forms.textareaField({
         label: 'IP Whitelist' | t('autologin'),
-        instructions: 'A list of Craft usernames or emails mapped to one or more IP addresses. Add each user on a new line, with IP addresses separated by commas.' | t('autologin'),
+        instructions: 'A list of Craft usernames or emails mapped to one or more direct connection IP addresses. Proxy forwarding headers are ignored. Add each user on a new line, with IP addresses separated by commas.' | t('autologin'),
         id: 'ipWhitelist',
         name: 'ipWhitelist',
         value: settings.getIpWhitelistText(),
@@ -33,8 +33,8 @@
     }) }}
 
     {{ forms.textareaField({
-        label: 'Basic Auth' | t('autologin'),
-        instructions: 'A list of Craft usernames or emails mapped to Basic HTTP Auth usernames. Add each mapping on a new line.' | t('autologin'),
+        label: 'Authenticated Upstream Users' | t('autologin'),
+        instructions: 'A list of Craft usernames or emails mapped to authenticated usernames supplied through the server-controlled REMOTE_USER value. Browser Authorization headers are not accepted. Add each mapping on a new line.' | t('autologin'),
         id: 'basicAuth',
         name: 'basicAuth',
         value: settings.getBasicAuthText(),

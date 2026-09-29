@@ -17,6 +17,10 @@ class Service extends Component
     public const REDIRECT_MODE_SITE = 'site';
     public const REDIRECT_MODE_CP = 'cp';
 
+    private const LOGIN_METHOD_BASIC_AUTH = 'basicAuth';
+    private const LOGIN_METHOD_IP_WHITELIST = 'ipWhitelist';
+    private const LOGIN_METHOD_URL_KEY = 'urlKeys';
+
 
     // Properties
     // =========================================================================
@@ -43,7 +47,7 @@ class Service extends Component
         if ($key) {
             foreach ($settings->urlKeys as $craftUsername => $matchKey) {
                 if (trim($key) === $matchKey) {
-                    return $this->_loginByUsername($craftUsername, $redirectMode);
+                    return $this->_loginByUsername($craftUsername, self::LOGIN_METHOD_URL_KEY, $redirectMode);
                 }
             }
         }
@@ -60,20 +64,20 @@ class Service extends Component
             return false;
         }
 
-        $currentIp = $request->getUserIP();
-        $currentAuthUser = $request->getAuthUser();
+        $currentIp = $request->getRemoteIP();
+        $currentAuthUser = $_SERVER['REMOTE_USER'] ?? null;
 
-        if ($currentAuthUser && !empty($settings->basicAuth)) {
+        if (is_string($currentAuthUser) && $currentAuthUser !== '' && !empty($settings->basicAuth)) {
             foreach ($settings->basicAuth as $craftUsername => $authUsername) {
                 if ($currentAuthUser === $authUsername) {
-                    return $this->_loginByUsername($craftUsername);
+                    return $this->_loginByUsername($craftUsername, self::LOGIN_METHOD_BASIC_AUTH);
                 }
             }
         }
 
         if ($currentIp && !empty($settings->ipWhitelist)) {
             if ($craftUsername = $this->_matchIp($currentIp)) {
-                return $this->_loginByUsername($craftUsername);
+                return $this->_loginByUsername($craftUsername, self::LOGIN_METHOD_IP_WHITELIST);
             }
         }
 
@@ -101,7 +105,7 @@ class Service extends Component
         return false;
     }
 
-    private function _loginByUsername(string $username, string $redirectMode = self::REDIRECT_MODE_SITE): bool
+    private function _loginByUsername(string $username, string $loginMethod, string $redirectMode = self::REDIRECT_MODE_SITE): bool
     {
         if (!$this->_getSettings()->enabled) {
             return false;
@@ -109,7 +113,7 @@ class Service extends Component
 
         $craftUser = Craft::$app->getUsers()->getUserByUsernameOrEmail($username);
 
-        if (!$craftUser || !$this->_isUserEligible($craftUser)) {
+        if (!$craftUser || !$this->_isUserEligible($craftUser, $loginMethod)) {
             return false;
         }
 
@@ -124,9 +128,17 @@ class Service extends Component
         return false;
     }
 
-    private function _isUserEligible(User $user): bool
+    private function _isUserEligible(User $user, string $loginMethod): bool
     {
-        return $user->getStatus() === User::STATUS_ACTIVE && !$user->locked;
+        if ($user->getStatus() !== User::STATUS_ACTIVE || $user->locked) {
+            return false;
+        }
+
+        if (in_array($loginMethod, $this->_getSettings()->mfaAssuredMethods, true)) {
+            return true;
+        }
+
+        return !Craft::$app->getAuth()->hasActiveMethod($user);
     }
 
     private function _afterLogin($redirectMode): bool

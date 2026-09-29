@@ -29,6 +29,7 @@ final class SecurityFixtureRequest extends craft\web\Request
     public bool $csrfValid = true;
     public bool $post = true;
     public ?string $authUser = null;
+    public ?string $remoteIp = null;
     public ?string $userIp = null;
 
     public function init(): void
@@ -58,6 +59,11 @@ final class SecurityFixtureRequest extends craft\web\Request
     public function getUserIP(int $filterOptions = 0): ?string
     {
         return $this->userIp;
+    }
+
+    public function getRemoteIP(int $filterOptions = 0): ?string
+    {
+        return $this->remoteIp;
     }
 
     public function getIsLivePreview(): bool
@@ -116,8 +122,18 @@ final class SecurityFixtureSession
 
 final class SecurityFixtureUser extends User
 {
+    public bool $hasActiveMfa = false;
+
     public function init(): void
     {
+    }
+}
+
+final class SecurityFixtureAuth
+{
+    public function hasActiveMethod(?User $user = null): bool
+    {
+        return $user instanceof SecurityFixtureUser && $user->hasActiveMfa;
     }
 }
 
@@ -139,6 +155,7 @@ final class SecurityFixtureApp extends yii\base\Component
     public string $charset = 'UTF-8';
     public string $language = 'en';
     public string $sourceLanguage = 'en';
+    public SecurityFixtureAuth $auth;
     public SecurityFixtureRequest $request;
     public Response $response;
     public SecurityFixtureSession $session;
@@ -156,6 +173,11 @@ final class SecurityFixtureApp extends yii\base\Component
                 return (object)['allowAdminChanges' => $this->allowAdminChanges];
             }
         };
+    }
+
+    public function getAuth(): SecurityFixtureAuth
+    {
+        return $this->auth;
     }
 
     public function getErrorHandler(): object
@@ -204,6 +226,7 @@ function fixtureAssert(bool $condition, string $message): void
 function fixtureApp(?SecurityFixtureUser $user = null): SecurityFixtureApp
 {
     $app = new SecurityFixtureApp();
+    $app->auth = new SecurityFixtureAuth();
     $app->request = new SecurityFixtureRequest();
     $app->session = new SecurityFixtureSession();
     $app->users = new SecurityFixtureUsers($user);
@@ -222,7 +245,7 @@ function fixtureService(verbb\autologin\models\Settings $settings): verbb\autolo
     return $service;
 }
 
-function fixtureUser(string $state = 'active', bool $admin = false): SecurityFixtureUser
+function fixtureUser(string $state = 'active', bool $admin = false, bool $hasActiveMfa = false): SecurityFixtureUser
 {
     $user = new SecurityFixtureUser();
     $user->id = 42;
@@ -232,26 +255,55 @@ function fixtureUser(string $state = 'active', bool $admin = false): SecurityFix
     $user->pending = $state === 'pending';
     $user->suspended = $state === 'suspended';
     $user->locked = $state === 'locked';
+    $user->hasActiveMfa = $hasActiveMfa;
 
     return $user;
 }
 
-function runLoginMethod(string $method, verbb\autologin\models\Settings $settings, SecurityFixtureUser $user): array
+function runLoginMethod(string $method, verbb\autologin\models\Settings $settings, SecurityFixtureUser $user, bool $trustedSource = true): array
 {
     $app = fixtureApp($user);
     $service = fixtureService($settings);
+    $hadRemoteUser = array_key_exists('REMOTE_USER', $_SERVER);
+    $previousRemoteUser = $_SERVER['REMOTE_USER'] ?? null;
+    $hadPhpAuthUser = array_key_exists('PHP_AUTH_USER', $_SERVER);
+    $previousPhpAuthUser = $_SERVER['PHP_AUTH_USER'] ?? null;
 
-    $result = match ($method) {
-        'url-key' => $service->loginByKey('fixture-key'),
-        'basic-auth' => (function() use ($app, $service) {
-            $app->request->authUser = 'fixture-upstream';
-            return $service->shouldLogin();
-        })(),
-        'ip' => (function() use ($app, $service) {
-            $app->request->userIp = '192.0.2.10';
-            return $service->shouldLogin();
-        })(),
-    };
+    unset($_SERVER['REMOTE_USER'], $_SERVER['PHP_AUTH_USER']);
+
+    try {
+        $result = match ($method) {
+            'url-key' => $service->loginByKey('fixture-key'),
+            'basic-auth' => (function() use ($app, $service, $trustedSource) {
+                if ($trustedSource) {
+                    $_SERVER['REMOTE_USER'] = 'fixture-upstream';
+                } else {
+                    $app->request->authUser = 'fixture-upstream';
+                    $_SERVER['PHP_AUTH_USER'] = 'fixture-upstream';
+                }
+
+                return $service->shouldLogin();
+            })(),
+            'ip' => (function() use ($app, $service, $trustedSource) {
+                $app->request->remoteIp = $trustedSource ? '192.0.2.10' : '198.51.100.20';
+                $app->request->userIp = '192.0.2.10';
+
+                return $service->shouldLogin();
+            })(),
+        };
+    } finally {
+        if ($hadRemoteUser) {
+            $_SERVER['REMOTE_USER'] = $previousRemoteUser;
+        } else {
+            unset($_SERVER['REMOTE_USER']);
+        }
+
+        if ($hadPhpAuthUser) {
+            $_SERVER['PHP_AUTH_USER'] = $previousPhpAuthUser;
+        } else {
+            unset($_SERVER['PHP_AUTH_USER']);
+        }
+    }
 
     return [$result, $app->session];
 }
@@ -262,6 +314,12 @@ $settings = new verbb\autologin\models\Settings([
     'basicAuth' => ['administrator' => 'fixture-upstream'],
     'ipWhitelist' => ['administrator' => ['192.0.2.10']],
 ]);
+
+$configuredSettings = new verbb\autologin\models\Settings([
+    'mfaAssuredMethods' => ['basicAuth'],
+]);
+fixtureAssert($configuredSettings->mfaAssuredMethods === ['basicAuth'], 'The MFA assurance policy must load from PHP configuration.');
+fixtureAssert(!array_key_exists('mfaAssuredMethods', $configuredSettings->toArray()), 'The configuration-only MFA assurance policy must not be serialized into project config.');
 
 $deniedStates = ['disabled', 'suspended', 'pending', 'locked', 'inactive'];
 
@@ -291,6 +349,44 @@ foreach (['basic-auth', 'ip'] as $method) {
     fixtureAssert($result === true, "An active mapped user must still be able to log in by $method.");
     fixtureAssert($session->loginAttempts === 1 && $session->identityId === 42, "$method must create the intended session.");
 }
+
+[$result, $session] = runLoginMethod('basic-auth', $settings, fixtureUser(), false);
+fixtureAssert($result === false, 'A browser-supplied Basic Auth username must not be accepted as authenticated upstream identity.');
+fixtureAssert($session->loginAttempts === 0, 'A browser-supplied Basic Auth username must not create a session.');
+
+$mismatchedBasicSettings = clone $settings;
+$mismatchedBasicSettings->basicAuth = ['administrator' => 'different-upstream-user'];
+[$result, $session] = runLoginMethod('basic-auth', $mismatchedBasicSettings, fixtureUser());
+fixtureAssert($result === false, 'A mismatched authenticated upstream identity must be denied.');
+fixtureAssert($session->loginAttempts === 0, 'A mismatched authenticated upstream identity must not create a session.');
+
+[$result, $session] = runLoginMethod('ip', $settings, fixtureUser(), false);
+fixtureAssert($result === false, 'A forwarded client IP must not override the direct connection address.');
+fixtureAssert($session->loginAttempts === 0, 'A forwarded client IP must not create a session.');
+
+$assuredMethodNames = [
+    'url-key' => 'urlKeys',
+    'basic-auth' => 'basicAuth',
+    'ip' => 'ipWhitelist',
+];
+
+foreach ($assuredMethodNames as $method => $settingName) {
+    [$result, $session] = runLoginMethod($method, $settings, fixtureUser(hasActiveMfa: true));
+    fixtureAssert($result === false, "$method must deny an account with active Craft two-step verification by default.");
+    fixtureAssert($session->loginAttempts === 0, "$method must not create a session before Craft two-step verification.");
+
+    $assuredSettings = clone $settings;
+    $assuredSettings->mfaAssuredMethods = [$settingName];
+    [$result, $session] = runLoginMethod($method, $assuredSettings, fixtureUser(hasActiveMfa: true));
+    fixtureAssert($result === true, "$method must allow an active two-step account when the method is explicitly assured.");
+    fixtureAssert($session->loginAttempts === 1 && $session->identityId === 42, "$method assurance must create only the intended session.");
+}
+
+$basicOnlySettings = clone $settings;
+$basicOnlySettings->mfaAssuredMethods = ['basicAuth'];
+[$result, $session] = runLoginMethod('url-key', $basicOnlySettings, fixtureUser(hasActiveMfa: true));
+fixtureAssert($result === false, 'Assuring Basic Auth must not allow an MFA account to log in with a URL key.');
+fixtureAssert($session->loginAttempts === 0, 'An unassured URL key must not create an MFA account session.');
 
 function dispatchSettingsAction(string $actionId, bool $admin, bool $allowAdminChanges, bool $csrfValid = true, bool $cp = true): string
 {
@@ -334,6 +430,12 @@ $controller = new verbb\autologin\controllers\SettingsController('fixture', new 
     'request' => $app->request,
     'response' => $app->response,
 ]);
+
+$prepareSubmittedSettings = new ReflectionMethod($controller, 'prepareSubmittedSettings');
+$preparedSettings = $prepareSubmittedSettings->invoke($controller, [
+    'mfaAssuredMethods' => ['urlKeys'],
+]);
+fixtureAssert(!array_key_exists('mfaAssuredMethods', $preparedSettings), 'The configuration-only MFA assurance policy must not be accepted from the control panel.');
 
 $app->request->post = false;
 

@@ -3,10 +3,12 @@
 ## Unreleased
 
 ### Changed
+- Require a server-authenticated identity for Basic Auth mappings, use direct connection addresses for IP mappings, and require explicit assurance before automatic login can bypass Craft two-step verification.
 - Route settings updates through Autologin’s authorized settings controller.
 - Restrict control panel settings access and updates to administrators, respecting the `allowAdminChanges` configuration setting.
 
 ### Fixed
+- Fixed a high-severity authentication bypass vulnerability.
 - Prevent automatic login while disabled and for non-active or locked Craft accounts.
 
 ## 4.0.4 - 2026-09-14
