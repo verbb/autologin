@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 4.0.5 - 2026-09-30
 
 ### Changed
 - Require a server-authenticated identity for Basic Auth mappings, use direct connection addresses for IP mappings, and require explicit assurance before automatic login can bypass Craft two-step verification.
