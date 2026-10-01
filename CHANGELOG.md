@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+- Fixed a medium-severity authentication bypass vulnerability.
+
 ## 4.0.5 - 2026-09-30
 
 ### Changed

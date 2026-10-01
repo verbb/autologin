@@ -20,6 +20,7 @@ class Service extends Component
     private const LOGIN_METHOD_BASIC_AUTH = 'basicAuth';
     private const LOGIN_METHOD_IP_WHITELIST = 'ipWhitelist';
     private const LOGIN_METHOD_URL_KEY = 'urlKeys';
+    private const MINIMUM_URL_KEY_LENGTH = 3;
 
 
     // Properties
@@ -44,11 +45,19 @@ class Service extends Component
             return $this->_afterLogin($redirectMode);
         }
 
-        if ($key) {
-            foreach ($settings->urlKeys as $craftUsername => $matchKey) {
-                if (trim($key) === $matchKey) {
-                    return $this->_loginByUsername($craftUsername, self::LOGIN_METHOD_URL_KEY, $redirectMode);
-                }
+        $key = $this->_normalizeUrlKey($key);
+
+        if ($key === null) {
+            return false;
+        }
+
+        foreach ($settings->urlKeys as $craftUsername => $matchKey) {
+            if (!is_string($matchKey) || $this->_normalizeUrlKey($matchKey) === null) {
+                continue;
+            }
+
+            if (hash_equals($matchKey, $key)) {
+                return $this->_loginByUsername($craftUsername, self::LOGIN_METHOD_URL_KEY, $redirectMode);
             }
         }
 
@@ -87,6 +96,26 @@ class Service extends Component
 
     // Private Methods
     // =========================================================================
+
+    private function _normalizeUrlKey(mixed $key): ?string
+    {
+        if (is_int($key) || is_float($key)) {
+            $key = (string)$key;
+        }
+
+        if (!is_string($key)) {
+            return null;
+        }
+
+        // Include Unicode separators so multibyte whitespace cannot satisfy the minimum length.
+        $key = preg_replace('/^[\s\p{Z}\x00]+|[\s\p{Z}\x00]+$/u', '', $key);
+
+        if ($key === null || mb_strlen($key, 'UTF-8') < self::MINIMUM_URL_KEY_LENGTH) {
+            return null;
+        }
+
+        return $key;
+    }
 
     private function _matchIp($currentIp): bool|int|string
     {

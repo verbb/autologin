@@ -308,6 +308,17 @@ function runLoginMethod(string $method, verbb\autologin\models\Settings $setting
     return [$result, $app->session];
 }
 
+function runUrlKeyCase(mixed $key, array $urlKeys, SecurityFixtureUser $user): array
+{
+    $app = fixtureApp($user);
+    $service = fixtureService(new verbb\autologin\models\Settings([
+        'enabled' => true,
+        'urlKeys' => $urlKeys,
+    ]));
+
+    return [$service->loginByKey($key), $app->session];
+}
+
 $settings = new verbb\autologin\models\Settings([
     'enabled' => true,
     'urlKeys' => ['administrator' => 'fixture-key'],
@@ -343,6 +354,58 @@ $settings->enabled = true;
 [$result, $session] = runLoginMethod('url-key', $settings, fixtureUser(admin: true));
 fixtureAssert($result === true, 'An active administrator must still be able to log in with a deliberate URL key.');
 fixtureAssert($session->loginAttempts === 1 && $session->identityId === 42, 'The administrator URL key must create the intended session.');
+
+$blankKeyUsers = [
+    'space' => [' ', fixtureUser(admin: true)],
+    'tab and newline' => ["\t\n", fixtureUser()],
+];
+
+foreach ($blankKeyUsers as $label => [$key, $user]) {
+    [$result, $session] = runUrlKeyCase($key, ['administrator' => ''], $user);
+    fixtureAssert($result === false, "A $label request key must not match a blank configured key.");
+    fixtureAssert($session->loginAttempts === 0, "A $label request key must not create a session.");
+}
+
+$unicodeWhitespace = "\u{00A0}\u{2003}\u{3000}";
+[$result, $session] = runUrlKeyCase($unicodeWhitespace, ['administrator' => $unicodeWhitespace], fixtureUser(admin: true));
+fixtureAssert($result === false, 'A Unicode whitespace request key must not match a whitespace-only configured key.');
+fixtureAssert($session->loginAttempts === 0, 'A Unicode whitespace key must not create a session.');
+
+foreach (['a', 'ab', "\u{1F511}", "\u{1F511}\u{1F511}"] as $shortKey) {
+    [$result, $session] = runUrlKeyCase($shortKey, ['administrator' => $shortKey], fixtureUser(admin: true));
+    fixtureAssert($result === false, 'A URL key shorter than three characters must be denied.');
+    fixtureAssert($session->loginAttempts === 0, 'A short URL key must not create a session.');
+}
+
+[$result, $session] = runUrlKeyCase(' abc ', ['administrator' => 'abc'], fixtureUser(admin: true));
+fixtureAssert($result === true, 'A padded URL key of the minimum length must retain the existing trim behavior.');
+fixtureAssert($session->loginAttempts === 1, 'A valid minimum-length URL key must create a session.');
+
+[$result, $session] = runUrlKeyCase("\u{1F511}\u{1F511}\u{1F511}", ['administrator' => "\u{1F511}\u{1F511}\u{1F511}"], fixtureUser(admin: true));
+fixtureAssert($result === true, 'A valid three-character Unicode URL key must be accepted.');
+fixtureAssert($session->loginAttempts === 1, 'A valid three-character Unicode URL key must create a session.');
+
+[$result, $session] = runUrlKeyCase(123, ['administrator' => '123'], fixtureUser(admin: true));
+fixtureAssert($result === true, 'A numeric request key must retain the existing scalar coercion behavior.');
+fixtureAssert($session->loginAttempts === 1, 'A valid numeric request key must create a session.');
+
+[$result, $session] = runUrlKeyCase(['123'], ['administrator' => '123'], fixtureUser(admin: true));
+fixtureAssert($result === false, 'A structured request key must be denied.');
+fixtureAssert($session->loginAttempts === 0, 'A structured request key must not create a session.');
+
+[$result, $session] = runUrlKeyCase('fixture-key', [
+    'blank-user' => '',
+    'administrator' => 'fixture-key',
+], fixtureUser(admin: true));
+fixtureAssert($result === true, 'A blank mapping must not prevent a later valid URL key from matching.');
+fixtureAssert($session->loginAttempts === 1, 'A later valid URL key must create only one session.');
+
+[$result, $session] = runUrlKeyCase(' ', [
+    'editor' => 'fixture-key',
+    'administrator' => '',
+], fixtureUser(admin: true));
+fixtureAssert($result === false, 'A later blank mapping must not match a whitespace request key.');
+fixtureAssert($session->loginAttempts === 0, 'A later blank mapping must not create a session.');
 
 foreach (['basic-auth', 'ip'] as $method) {
     [$result, $session] = runLoginMethod($method, $settings, fixtureUser());
