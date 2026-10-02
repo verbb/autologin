@@ -8,20 +8,22 @@ You can provide your users with a url that automatically logs them in. To set th
 
 return [
     'urlKeys' => [
-        'steeve' => 'BepmD8GQBZpaFpXQ',
+        'steeve' => 'BepmD8GQBZpaFpXQm7J9c4V2s8Nr6Tyk',
     ],
 ];
 ```
 
-After setting that up, you can login by going to `https://my-site.test/autologin?key=BepmD8GQBZpaFpXQ`. This will login the user `steeve` automatically.
+After setting that up, you can login by going to `https://my-site.test/autologin?key=BepmD8GQBZpaFpXQm7J9c4V2s8Nr6Tyk`. This will login the user `steeve` automatically.
 
-If you want to redirect to the control panel dashboard, add `cp=true` to the url: `https://my-site.test/autologin?key=BepmD8GQBZpaFpXQ&cp=true`
+If you want to redirect to the control panel dashboard, add `cp=true` to the url: `https://my-site.test/autologin?key=BepmD8GQBZpaFpXQm7J9c4V2s8Nr6Tyk&cp=true`
 
 ## Testing and Revoking a Link
 
 Use a separate private browser window to test the link while logged out. Autologin does not switch an already signed-in visitor to a different account. After opening the link, check which account is active and that its permissions suit the intended task. Adding `cp=true` chooses the control panel as the destination; it does not grant additional permissions.
 
-The key is a reusable credential, not the user's Craft password or a one-time invitation. Use a unique, difficult-to-guess value and share it only with someone who should be able to sign in as that account. To revoke the link, remove its mapping from `urlKeys` or replace the key. Replacing or removing a key invalidates existing links, but does not end sessions that were already created. Disabling automatic login blocks the link without deleting its mapping, so the same key works again if automatic login is re-enabled. Test the old link in a logged-out browser after changing it.
+The key is a reusable credential, not the user's Craft password or a one-time invitation. Use at least 32 randomly generated characters for new keys and share them only with someone who should be able to sign in as that account. Existing shorter keys remain compatible, but should be rotated to stronger values. To revoke the link, remove its mapping from `urlKeys` or replace the key. Replacing or removing a key invalidates existing links, but does not end sessions that were already created. Disabling automatic login blocks the link without deleting its mapping, so the same key works again if automatic login is re-enabled. Test the old link in a logged-out browser after changing it.
+
+Autologin temporarily limits unmatched URL-key attempts from the same direct connection address. Visitors behind the same proxy or network address share that allowance, and distributed attempts can use multiple addresses. Use shared cache and mutex backends on multi-node sites, and retain edge rate limiting where stronger or cluster-wide protection is required. Submitted keys are not stored in the limiter.
 
 ## Two-Step Verification
 Autologin leaves accounts with an active Craft two-step method logged out by default. Those users can sign in through Craft’s normal login flow and complete their configured second step.

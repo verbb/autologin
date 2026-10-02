@@ -149,6 +149,55 @@ final class SecurityFixtureUsers
     }
 }
 
+final class SecurityFixtureCache
+{
+    public array $entries = [];
+    public bool $failWrites = false;
+
+    public function get(string $key): mixed
+    {
+        return $this->entries[$key] ?? false;
+    }
+
+    public function set(string $key, mixed $value, int $duration = 0): bool
+    {
+        if ($this->failWrites) {
+            return false;
+        }
+
+        $this->entries[$key] = $value;
+
+        return true;
+    }
+}
+
+final class SecurityFixtureMutex
+{
+    public array $acquiredNames = [];
+    public array $heldNames = [];
+    public bool $failAcquires = false;
+
+    public function acquire(string $name, int $timeout = 0): bool
+    {
+        $this->acquiredNames[] = $name;
+
+        if ($this->failAcquires || isset($this->heldNames[$name])) {
+            return false;
+        }
+
+        $this->heldNames[$name] = true;
+
+        return true;
+    }
+
+    public function release(string $name): bool
+    {
+        unset($this->heldNames[$name]);
+
+        return true;
+    }
+}
+
 final class SecurityFixtureApp extends yii\base\Component
 {
     public bool $allowAdminChanges = true;
@@ -156,6 +205,8 @@ final class SecurityFixtureApp extends yii\base\Component
     public string $language = 'en';
     public string $sourceLanguage = 'en';
     public SecurityFixtureAuth $auth;
+    public SecurityFixtureCache $cache;
+    public SecurityFixtureMutex $mutex;
     public SecurityFixtureRequest $request;
     public Response $response;
     public SecurityFixtureSession $session;
@@ -180,6 +231,11 @@ final class SecurityFixtureApp extends yii\base\Component
         return $this->auth;
     }
 
+    public function getCache(): SecurityFixtureCache
+    {
+        return $this->cache;
+    }
+
     public function getErrorHandler(): object
     {
         return (object)['exception' => null];
@@ -187,12 +243,24 @@ final class SecurityFixtureApp extends yii\base\Component
 
     public function getI18n(): yii\i18n\I18N
     {
-        return new yii\i18n\I18N();
+        return new yii\i18n\I18N([
+            'translations' => [
+                'autologin' => [
+                    'class' => yii\i18n\PhpMessageSource::class,
+                    'basePath' => dirname(__DIR__, 2) . '/src/translations',
+                ],
+            ],
+        ]);
     }
 
     public function getIsLive(): bool
     {
         return true;
+    }
+
+    public function getMutex(): SecurityFixtureMutex
+    {
+        return $this->mutex;
     }
 
     public function getRequest(): SecurityFixtureRequest
@@ -227,6 +295,8 @@ function fixtureApp(?SecurityFixtureUser $user = null): SecurityFixtureApp
 {
     $app = new SecurityFixtureApp();
     $app->auth = new SecurityFixtureAuth();
+    $app->cache = new SecurityFixtureCache();
+    $app->mutex = new SecurityFixtureMutex();
     $app->request = new SecurityFixtureRequest();
     $app->session = new SecurityFixtureSession();
     $app->users = new SecurityFixtureUsers($user);
@@ -319,6 +389,17 @@ function runUrlKeyCase(mixed $key, array $urlKeys, SecurityFixtureUser $user): a
     return [$service->loginByKey($key), $app->session];
 }
 
+function expectUrlKeyRateLimit(callable $attempt, SecurityFixtureApp $app, string $message): void
+{
+    try {
+        $attempt();
+        throw new RuntimeException($message);
+    } catch (yii\web\TooManyRequestsHttpException) {
+        $retryAfter = (int)$app->response->getHeaders()->get('Retry-After');
+        fixtureAssert($retryAfter >= 1 && $retryAfter <= 300, 'Rate-limited responses must provide a bounded Retry-After header.');
+    }
+}
+
 $settings = new verbb\autologin\models\Settings([
     'enabled' => true,
     'urlKeys' => ['administrator' => 'fixture-key'],
@@ -406,6 +487,103 @@ fixtureAssert($session->loginAttempts === 1, 'A later valid URL key must create 
 ], fixtureUser(admin: true));
 fixtureAssert($result === false, 'A later blank mapping must not match a whitespace request key.');
 fixtureAssert($session->loginAttempts === 0, 'A later blank mapping must not create a session.');
+
+$rateLimitedApp = fixtureApp(fixtureUser(admin: true));
+$rateLimitedApp->request->remoteIp = '203.0.113.10';
+$rateLimitedService = fixtureService(new verbb\autologin\models\Settings([
+    'enabled' => true,
+    'urlKeys' => ['administrator' => 'abc'],
+]));
+
+for ($attempt = 1; $attempt <= 5; $attempt++) {
+    $rateLimitedApp->request->userIp = "198.51.100.$attempt";
+    fixtureAssert($rateLimitedService->loginByKey("wrong-key-$attempt") === false, "Unmatched URL key attempt $attempt must be denied.");
+}
+
+fixtureAssert($rateLimitedApp->mutex->heldNames === [], 'The URL-key limiter must release its mutex after failed attempts.');
+$limiterState = json_encode([$rateLimitedApp->cache->entries, $rateLimitedApp->mutex->acquiredNames]);
+fixtureAssert(!str_contains($limiterState, '203.0.113.10'), 'The URL-key limiter must not store the raw direct connection address.');
+fixtureAssert(!str_contains($limiterState, 'wrong-key'), 'The URL-key limiter must not store attempted credentials.');
+
+expectUrlKeyRateLimit(
+    fn() => $rateLimitedService->loginByKey('abc'),
+    $rateLimitedApp,
+    'A sixth URL-key attempt from the same direct address must be rate limited.',
+);
+fixtureAssert($rateLimitedApp->session->loginAttempts === 0, 'Rate limiting must run before a matching key can create a session.');
+
+$rateLimitedApp->request->remoteIp = '203.0.113.11';
+fixtureAssert($rateLimitedService->loginByKey('abc') === true, 'A separate direct connection address must retain its own URL-key allowance.');
+fixtureAssert($rateLimitedApp->session->loginAttempts === 1, 'A valid key from an independent source must create the intended session.');
+
+$successfulApp = fixtureApp(fixtureUser(admin: true));
+$successfulApp->request->remoteIp = '192.0.2.20';
+$successfulService = fixtureService(new verbb\autologin\models\Settings([
+    'enabled' => true,
+    'urlKeys' => ['administrator' => 'abc'],
+]));
+fixtureAssert($successfulService->loginByKey('wrong-one') === false, 'An unmatched key below the limit must be denied.');
+fixtureAssert($successfulService->loginByKey('wrong-two') === false, 'A second unmatched key below the limit must be denied.');
+fixtureAssert($successfulService->loginByKey('abc') === true, 'A valid existing key below the limit must remain usable.');
+
+$malformedApp = fixtureApp(fixtureUser(admin: true));
+$malformedApp->request->remoteIp = '192.0.2.30';
+$malformedService = fixtureService(new verbb\autologin\models\Settings([
+    'enabled' => true,
+    'urlKeys' => ['administrator' => 'abc'],
+]));
+fixtureAssert($malformedService->loginByKey('ab') === false, 'Existing short-key rejection must remain unchanged.');
+fixtureAssert($malformedService->loginByKey(['abc']) === false, 'Existing structured-key rejection must remain unchanged.');
+fixtureAssert($malformedApp->cache->entries === [], 'Malformed keys must not create rate-limit state.');
+
+$consoleApp = fixtureApp(fixtureUser(admin: true));
+$consoleApp->request->console = true;
+$consoleApp->mutex->failAcquires = true;
+$consoleService = fixtureService(new verbb\autologin\models\Settings([
+    'enabled' => true,
+    'urlKeys' => ['administrator' => 'abc'],
+]));
+fixtureAssert($consoleService->loginByKey('abc') === true, 'Trusted console calls must retain their existing URL-key behavior.');
+fixtureAssert($consoleApp->mutex->acquiredNames === [], 'Trusted console calls must not consume the public HTTP attempt budget.');
+
+$expiredApp = fixtureApp(fixtureUser(admin: true));
+$expiredApp->request->remoteIp = '192.0.2.40';
+$expiredService = fixtureService(new verbb\autologin\models\Settings([
+    'enabled' => true,
+    'urlKeys' => ['administrator' => 'abc'],
+]));
+fixtureAssert($expiredService->loginByKey('wrong-one') === false, 'An unmatched key must create a rate-limit entry.');
+$expiredCacheKey = array_key_first($expiredApp->cache->entries);
+$expiredApp->cache->entries[$expiredCacheKey] = ['count' => 5, 'resetAt' => time() - 1];
+fixtureAssert($expiredService->loginByKey('wrong-two') === false, 'An expired rate-limit window must allow a new failed attempt.');
+fixtureAssert($expiredApp->cache->entries[$expiredCacheKey]['count'] === 1, 'An expired rate-limit window must restart its count.');
+
+$lockFailureApp = fixtureApp(fixtureUser(admin: true));
+$lockFailureApp->request->remoteIp = '192.0.2.50';
+$lockFailureApp->mutex->failAcquires = true;
+$lockFailureService = fixtureService(new verbb\autologin\models\Settings([
+    'enabled' => true,
+    'urlKeys' => ['administrator' => 'abc'],
+]));
+expectUrlKeyRateLimit(
+    fn() => $lockFailureService->loginByKey('wrong-key'),
+    $lockFailureApp,
+    'URL-key authentication must fail closed when limiter locking is unavailable.',
+);
+
+$cacheFailureApp = fixtureApp(fixtureUser(admin: true));
+$cacheFailureApp->request->remoteIp = '192.0.2.60';
+$cacheFailureApp->cache->failWrites = true;
+$cacheFailureService = fixtureService(new verbb\autologin\models\Settings([
+    'enabled' => true,
+    'urlKeys' => ['administrator' => 'abc'],
+]));
+expectUrlKeyRateLimit(
+    fn() => $cacheFailureService->loginByKey('wrong-key'),
+    $cacheFailureApp,
+    'URL-key authentication must fail closed when limiter state cannot be persisted.',
+);
+fixtureAssert($cacheFailureApp->mutex->heldNames === [], 'The URL-key limiter must release its mutex after cache failure.');
 
 foreach (['basic-auth', 'ip'] as $method) {
     [$result, $session] = runLoginMethod($method, $settings, fixtureUser());

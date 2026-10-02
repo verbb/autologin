@@ -52,7 +52,7 @@ Configure your web server or identity proxy to authenticate the request before i
 
 **Type:** `array` · **Default:** `[]`
 
-A list of Craft usernames/emails mapped to url keys.
+A list of Craft usernames/emails mapped to URL keys. Use at least 32 randomly generated characters for new keys. Existing shorter values remain compatible, but should be rotated.
 :::
 
 
@@ -131,10 +131,12 @@ Return an array with the key as the username you wish to autologin, and the valu
 
 return [
     'urlKeys' => [
-        'craftUserName' => 'BepmD8GQBZpaFpXQ',
+        'craftUserName' => 'BepmD8GQBZpaFpXQm7J9c4V2s8Nr6Tyk',
     ],
 ];
 ```
+
+Unmatched URL-key attempts are limited to five per direct connection address within five minutes. Because proxy and NAT users can share a direct address, configure shared cache and mutex backends for multi-node installations and use edge rate limiting when stronger or distributed-attack protection is required.
 
 ## Control Panel
 You can also manage ordinary configuration settings through the Control Panel by visiting **Settings → Autologin**. Configure `mfaAssuredMethods` in `config/autologin.php` so the site’s MFA assurance decision remains explicit in code.

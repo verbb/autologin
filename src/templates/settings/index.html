@@ -46,12 +46,12 @@
 
     {{ forms.textareaField({
         label: 'URL Keys' | t('autologin'),
-        instructions: 'A list of Craft usernames or emails mapped to URL keys. Add each mapping on a new line.' | t('autologin'),
+        instructions: 'A list of Craft usernames or emails mapped to URL keys. Add each mapping on a new line. Use at least 32 randomly generated characters for new keys.' | t('autologin'),
         id: 'urlKeys',
         name: 'urlKeys',
         value: settings.getUrlKeyText(),
         rows: 4,
-        placeholder: 'craftUsername: BepmD8GQBZpaFpXQ',
+        placeholder: 'craftUsername: BepmD8GQBZpaFpXQm7J9c4V2s8Nr6Tyk',
         errors: settings.getErrors('urlKeys'),
         warning: macros.configWarning('urlKeys', 'autologin'),
     }) }}

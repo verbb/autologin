@@ -9,6 +9,10 @@ use craft\base\Component;
 use craft\elements\User;
 use craft\helpers\UrlHelper;
 
+use yii\web\TooManyRequestsHttpException;
+
+use Throwable;
+
 class Service extends Component
 {
     // Constants
@@ -21,6 +25,10 @@ class Service extends Component
     private const LOGIN_METHOD_IP_WHITELIST = 'ipWhitelist';
     private const LOGIN_METHOD_URL_KEY = 'urlKeys';
     private const MINIMUM_URL_KEY_LENGTH = 3;
+    private const URL_KEY_ATTEMPT_LIMIT = 5;
+    private const URL_KEY_ATTEMPT_WINDOW = 300;
+    private const URL_KEY_RATE_LIMIT_CACHE_PREFIX = 'autologin:url-key-rate-limit:';
+    private const URL_KEY_RATE_LIMIT_MUTEX_PREFIX = 'autologin:url-key-rate-limit-lock:';
 
 
     // Properties
@@ -51,14 +59,10 @@ class Service extends Component
             return false;
         }
 
-        foreach ($settings->urlKeys as $craftUsername => $matchKey) {
-            if (!is_string($matchKey) || $this->_normalizeUrlKey($matchKey) === null) {
-                continue;
-            }
+        $craftUsername = $this->_matchUrlKey($key, $settings->urlKeys);
 
-            if (hash_equals($matchKey, $key)) {
-                return $this->_loginByUsername($craftUsername, self::LOGIN_METHOD_URL_KEY, $redirectMode);
-            }
+        if ($craftUsername !== null) {
+            return $this->_loginByUsername($craftUsername, self::LOGIN_METHOD_URL_KEY, $redirectMode);
         }
 
         return false;
@@ -115,6 +119,99 @@ class Service extends Component
         }
 
         return $key;
+    }
+
+    private function _matchUrlKey(string $key, array $urlKeys): string|int|null
+    {
+        $request = Craft::$app->getRequest();
+
+        if ($request->getIsConsoleRequest()) {
+            return $this->_findUrlKeyUsername($key, $urlKeys);
+        }
+
+        $identity = $request->getRemoteIP() ?: 'unknown';
+        $identityHash = hash('sha256', $identity);
+        $cacheKey = self::URL_KEY_RATE_LIMIT_CACHE_PREFIX . $identityHash;
+        $mutexKey = self::URL_KEY_RATE_LIMIT_MUTEX_PREFIX . $identityHash;
+        $mutex = null;
+        $acquired = false;
+
+        try {
+            $mutex = Craft::$app->getMutex();
+
+            if (!($mutex?->acquire($mutexKey, 0) ?? false)) {
+                $this->_rejectUrlKeyAttempt(1);
+            }
+
+            $acquired = true;
+            $cache = Craft::$app->getCache();
+            $now = time();
+            $storedEntry = $cache->get($cacheKey);
+            $isCurrentEntry = is_array($storedEntry) &&
+                isset($storedEntry['count'], $storedEntry['resetAt']) &&
+                (int)$storedEntry['resetAt'] > $now;
+            $entry = $isCurrentEntry ? $storedEntry : [
+                'count' => 0,
+                'resetAt' => $now + self::URL_KEY_ATTEMPT_WINDOW,
+            ];
+
+            if ((int)$entry['count'] >= self::URL_KEY_ATTEMPT_LIMIT) {
+                $this->_rejectUrlKeyAttempt((int)$entry['resetAt'] - $now);
+            }
+
+            $craftUsername = $this->_findUrlKeyUsername($key, $urlKeys);
+
+            if ($craftUsername !== null) {
+                return $craftUsername;
+            }
+
+            $entry['count'] = (int)$entry['count'] + 1;
+            $duration = max(1, (int)$entry['resetAt'] - $now);
+
+            if (!$cache->set($cacheKey, $entry, $duration) || $cache->get($cacheKey) !== $entry) {
+                $this->_rejectUrlKeyAttempt(1);
+            }
+
+            return null;
+        } catch (TooManyRequestsHttpException $e) {
+            throw $e;
+        } catch (Throwable) {
+            $this->_rejectUrlKeyAttempt(1);
+        } finally {
+            if ($acquired) {
+                try {
+                    $mutex?->release($mutexKey);
+                } catch (Throwable) {
+                    // The mutex will be released automatically when the request ends.
+                }
+            }
+        }
+    }
+
+    private function _findUrlKeyUsername(string $key, array $urlKeys): string|int|null
+    {
+        foreach ($urlKeys as $craftUsername => $matchKey) {
+            if (!is_string($matchKey) || $this->_normalizeUrlKey($matchKey) === null) {
+                continue;
+            }
+
+            if (hash_equals($matchKey, $key)) {
+                return $craftUsername;
+            }
+        }
+
+        return null;
+    }
+
+    private function _rejectUrlKeyAttempt(int $retryAfter): never
+    {
+        try {
+            Craft::$app->getResponse()->getHeaders()->set('Retry-After', (string)max(1, $retryAfter));
+        } catch (Throwable) {
+            // Rate limiting remains fail-closed if response headers cannot be updated.
+        }
+
+        throw new TooManyRequestsHttpException(Craft::t('autologin', 'Too many automatic login attempts. Please try again later.'));
     }
 
     private function _matchIp($currentIp): bool|int|string
