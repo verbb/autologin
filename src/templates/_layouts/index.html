@@ -1,6 +1,6 @@
 {% extends parentLayout ?? '_layouts/cp' %}
 
-{% do view.registerAssetBundle('verbb\\autologin\\assetbundles\\AutologinAsset') %}
+{% do view.registerAssetBundle('verbb\\autologin\\web\\assets\\cp\\AutologinAsset') %}
 
 {% if title is not defined %}
     {% set title = 'Autologin' | t('autologin') %}
