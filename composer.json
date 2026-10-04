@@ -2,7 +2,7 @@
     "name": "verbb/autologin",
     "description": "A Craft CMS plugin for signing users in with URL keys, trusted IPs or HTTP Basic Authentication.",
     "type": "craft-plugin",
-    "version": "4.0.6",
+    "version": "4.0.7",
     "keywords": [
         "craft",
         "cms",

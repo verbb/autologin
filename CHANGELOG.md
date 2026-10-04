@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 4.0.7 - 2026-10-05
 
 ### Fixed
 - Fixed a low-severity improper restriction of excessive authentication attempts vulnerability.
