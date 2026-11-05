@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 4.0.9 - 2026-11-05
 
 ### Fixed
 - Fixed environment variables and aliases in the Redirect URL setting not being parsed.
