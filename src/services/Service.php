@@ -7,6 +7,7 @@ use verbb\autologin\models\Settings;
 use Craft;
 use craft\base\Component;
 use craft\elements\User;
+use craft\helpers\App;
 use craft\helpers\UrlHelper;
 
 use yii\web\TooManyRequestsHttpException;
@@ -271,7 +272,7 @@ class Service extends Component
     {
         $settings = $this->_getSettings();
 
-        if ($redirectMode === self::REDIRECT_MODE_SITE && ($url = $settings->redirectUrl)) {
+        if ($redirectMode === self::REDIRECT_MODE_SITE && ($url = App::parseEnv($settings->redirectUrl))) {
             Craft::$app->getResponse()->redirect($url);
 
             Craft::$app->end();
