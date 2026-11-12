@@ -11,20 +11,23 @@ Map a difficult-to-guess URL key to a Craft account and share a link that signs 
 - Automatically recognise nominated users when requests arrive from approved addresses.
 - Map an HTTP Basic Authentication username to a Craft account.
 - Send the signed-in user to the public site or directly to the Craft dashboard.
-- Choose the destination that should follow a successful automatic login.
 - Keep mappings and behaviour in a PHP config file alongside the rest of the project.
 
 ## Documentation
+
 Visit the [Autologin Plugin page](https://verbb.io/craft-plugins/autologin) for all documentation, guides, pricing and developer resources.
 
 ## Credit & Thanks
+
 Originally created by the team at [Superbig](https://superbig.co/).
 
 ## Support
-Get in touch with us via the [Autologin Support page](https://verbb.io/craft-plugins/autologin/support) or by [creating a Github issue](https://github.com/verbb/autologin/issues)
+
+Get in touch with us via the [Autologin Support page](https://verbb.io/craft-plugins/autologin/support) or by [creating a GitHub issue](https://github.com/verbb/autologin/issues).
 
 ## Sponsor
-Autologin is licensed under the MIT license, meaning it will always be free and open source - we love free stuff! If you'd like to show your support to the plugin regardless, [Sponsor](https://github.com/sponsors/verbb) development.
+
+Autologin is licensed under the MIT license, so it will always be free and open source. If you'd like to support it anyway, you can [sponsor its development](https://github.com/sponsors/verbb).
 
 <h2></h2>
 

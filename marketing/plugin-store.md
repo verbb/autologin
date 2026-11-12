@@ -8,5 +8,4 @@ Map a difficult-to-guess URL key to a Craft account and share a link that signs 
 - Automatically recognise nominated users when requests arrive from approved addresses.
 - Map an HTTP Basic Authentication username to a Craft account.
 - Send the signed-in user to the public site or directly to the Craft dashboard.
-- Choose the destination that should follow a successful automatic login.
 - Keep mappings and behaviour in a PHP config file alongside the rest of the project.
