@@ -52,7 +52,7 @@ Configure your web server or identity proxy to authenticate the request before i
 
 **Type:** `array` · **Default:** `[]`
 
-A list of Craft usernames/emails mapped to URL keys. Use at least 32 randomly generated characters for new keys. Existing shorter values remain compatible, but should be rotated.
+A list of Craft usernames/emails mapped to URL keys. Use at least 32 randomly generated characters for each key, and replace any shorter keys.
 :::
 
 
