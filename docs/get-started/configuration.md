@@ -12,7 +12,7 @@ return [
 ];
 ```
 
-All other settings keep their defaults. Add any further settings you want to change to the same array. The options below explain the available settings and their defaults.
+All other settings keep their defaults. Add any further settings you want to change to the same array. The options below explain the available settings and their defaults. You can also manage many of these settings in the control panel under **Settings → Autologin**.
 
 ## Configuration Options
 
@@ -137,6 +137,3 @@ return [
 ```
 
 Unmatched URL-key attempts are limited to five per direct connection address within five minutes. Because proxy and NAT users can share a direct address, configure shared cache and mutex backends for multi-node installations and use edge rate limiting when stronger or distributed-attack protection is required.
-
-## Control Panel
-You can also manage ordinary configuration settings through the Control Panel by visiting **Settings → Autologin**. Configure `mfaAssuredMethods` in `config/autologin.php` so the site’s MFA assurance decision remains explicit in code.
